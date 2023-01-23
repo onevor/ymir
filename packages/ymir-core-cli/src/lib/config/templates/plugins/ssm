@@ -1,0 +1,7 @@
+[DESCRIBE]
+  alias: ssm
+
+[LOCATION]
+  path: ./node_modules/@voneor/ymir-resolver-ssm
+  install_cmd?: npm i @onevor/ymir-resolver-ssm
+  isGlobal?: false; false by default

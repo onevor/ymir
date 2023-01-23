@@ -1,0 +1,16 @@
+[DESCRIBE]
+  description?: This is the default stack, variables that are the same in all stacks should be defined here
+
+[PORT]
+  path: /default/test/secure/port; the key, id, url, or path that should be used by a resolver, to fetch.
+  description?: Describe the value and its use
+  required?: false; (true by default)
+  resolver?: ssm; the resolver name, if not provided, the default resolver will be used
+
+[LOG_VERBOSE]
+  path: /default/test/secure/port
+  description?: Turn on verbose logging
+  required?: false
+
+[SECRET_KEY]
+  path: /default/test/secure/port

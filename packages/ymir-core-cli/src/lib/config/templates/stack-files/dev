@@ -1,0 +1,10 @@
+[DESCRIBE]
+  description?: This is the stack to use for the development environment
+
+[DEBUG]
+  path: /dev/test/secure/port
+  description?: Set application in debug mode
+  required?: false
+
+[TEST_VAR]
+  path: /dev/test/secure/port

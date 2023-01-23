@@ -1,0 +1,14 @@
+[DESCRIBE]
+  name: project-name;
+  description?: This is the default config for all stacks
+  ymir_version: 0.0.1; The version of ymir that this config is compatible with
+  project_version: 0.0.1; Should mirror the git tag and or npm tag
+
+[FILE]
+  path: ./; Relative to the project root;
+  name: .env; The name of the file
+  description?: This is the default dot env file for all stacks
+
+[DEFAULT_RESOLVER]
+  name: ssm; alias for the resolver
+  description?: Resolver for AWS SSM
