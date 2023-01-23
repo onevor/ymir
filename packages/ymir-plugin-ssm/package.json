@@ -1,0 +1,31 @@
+{
+  "name": "@onevor/ymir-plugin-ssm",
+  "version": "0.0.1",
+  "description": "Ymir resolver for AWS SSM",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onevor/ymir.git"
+  },
+  "keywords": [
+    "Ymir",
+    "config",
+    "AWS",
+    "SSM",
+    "secret",
+    "env",
+    "plugin"
+  ],
+  "author": "Dennis Lien",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/onevor/ymir/issues"
+  },
+  "homepage": "https://github.com/onevor/ymir#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1212.0"
+  }
+}
