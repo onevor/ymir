@@ -3,8 +3,15 @@
   "version": "0.0.1",
   "description": "Manage app config and secrets",
   "main": "index.js",
+  "bin": {
+    "ymir": "./src/bin/index.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:templates": "cp -r ./src/lib/config/templates ../../dist/libs/ymir-core-cli/src/lib/config/templates",
+    "build": "cd ../../ && nx run ymir-core-cli:build",
+    "chmod": "cd ../../ && nx run ymir-core-cli:chmod",
+    "source": "source ./scripts/source-ymir.sh",
+    "build:cli": "npm run build && npm run chmod && npm run build:templates && npm run source"
   },
   "repository": {
     "type": "git",
