@@ -1,0 +1,39 @@
+{
+  "name": "@onevor/ymir-core-cli",
+  "version": "0.0.1",
+  "description": "Manage app config and secrets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onevor/ymir.git"
+  },
+  "keywords": [
+    "env",
+    "config",
+    "secret",
+    "cli",
+    "tool",
+    "automation",
+    "ci/cd"
+  ],
+  "author": "Dennis Lien",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/onevor/ymir/issues"
+  },
+  "homepage": "https://github.com/onevor/ymir#readme",
+  "devDependencies": {
+    "@types/command-line-args": "^5.2.0",
+    "@types/node": "^18.11.15",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "command-line-args": "^5.2.1",
+    "dotenv": "^16.0.3"
+  }
+}
