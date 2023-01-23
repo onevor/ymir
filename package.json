@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {},
-  "private": true,
+  "private": false,
   "devDependencies": {
     "@nrwl/cli": "^15.5.3",
     "@nrwl/eslint-plugin-nx": "15.5.3",

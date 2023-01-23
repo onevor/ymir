@@ -47,7 +47,7 @@
     "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm publish"],
+        "commands": ["npm publish --access public"],
         "cwd": "dist/ymir-core-cli",
         "parallel": false
       },

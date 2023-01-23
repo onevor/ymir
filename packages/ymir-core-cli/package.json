@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Manage app config and secrets",
   "main": "index.js",
+  "private": false,
   "bin": {
     "ymir": "./src/bin/index.js"
   },
