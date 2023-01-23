@@ -31,8 +31,8 @@ describe('Ymir check install', () => {
               alias: 'ssm',
             },
             LOCATION: {
-              path: './node_modules/@vor/ymir-resolver-ssm',
-              'install_cmd?': 'npm install @vor/ymir-resolver-ssm',
+              path: './node_modules/@onevor/ymir-resolver-ssm',
+              'install_cmd?': 'npm install @onevor/ymir-resolver-ssm',
               'isGlobal?': false,
             },
           });
@@ -42,8 +42,9 @@ describe('Ymir check install', () => {
               alias: 'azure-key-vault',
             },
             LOCATION: {
-              path: './node_modules/@vor/ymir-resolver-azure-key-vault',
-              'install_cmd?': 'npm install @vor/ymir-resolver-azure-key-vault',
+              path: './node_modules/@onevor/ymir-resolver-azure-key-vault',
+              'install_cmd?':
+                'npm install @onevor/ymir-resolver-azure-key-vault',
               'isGlobal?': false,
             },
           });
@@ -53,9 +54,9 @@ describe('Ymir check install', () => {
               alias: 'gcp-secret-manager',
             },
             LOCATION: {
-              path: './node_modules/@vor/ymir-resolver-gcp-secret-manager',
+              path: './node_modules/@onevor/ymir-resolver-gcp-secret-manager',
               'install_cmd?':
-                'npm install @vor/ymir-resolver-gcp-secret-manager',
+                'npm install @onevor/ymir-resolver-gcp-secret-manager',
               'isGlobal?': false,
             },
           });
@@ -79,16 +80,16 @@ describe('Ymir check install', () => {
         });
         it('should locate closest pk.json file', async () => {
           const path = await pkInstall.locateNearestPackageJson(cwd);
-          const rel = path.split('/vor-app/')[1];
-          expect(rel).toEqual('libs/ymir-core-cli/package.json');
+          const rel = path.split('/ymir/')[1];
+          expect(rel).toEqual('packages/ymir-core-cli/package.json');
         });
         it('should locate closest node_modules dir', async () => {
           const path = await pkInstall.locateNearestNodeModules(cwd);
-          const rel = path.split('/vor-app/')[1];
-          expect(rel).toEqual('libs/ymir-core-cli/node_modules');
+          const rel = path.split('/ymir/')[1];
+          expect(rel).toEqual('packages/ymir-core-cli/node_modules');
         });
         it('should return false on not installed pk', async () => {
-          const name = '@vor/ymir-resolver-ssm';
+          const name = '@onevor/ymir-resolver-ssm';
           const hasDep = await pkInstall.checkIfPluginIsInstalledInPackageJson(
             cwd,
             name

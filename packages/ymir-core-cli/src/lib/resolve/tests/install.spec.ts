@@ -20,11 +20,11 @@ describe('Ymir install plugin', () => {
       existingTestPluginFile = {
         DESCRIBE: {
           alias: 'test',
-          'pk_name?': 'typescript',
+          'pk_name?': 'dotenv',
         },
         LOCATION: {
-          path: './node_modules/typescript',
-          'install_cmd?': 'npm i -D typescript',
+          path: './node_modules/dotenv',
+          'install_cmd?': 'npm i -D dotenv',
           'is_global?': false,
         },
       };
@@ -44,9 +44,9 @@ describe('Ymir install plugin', () => {
       it('Should install new plugin with path', async () => {
         const pathToLocalPlugin = nodePath.join(
           __dirname,
-          '../../../../node_modules/typescript'
+          '../../../../node_modules/dotenv'
         );
-        const alias = 'ts';
+        const alias = 'env';
         const [err, result] = await install.installPluginWithPath(
           ymirPath,
           pathToLocalPlugin,
@@ -56,22 +56,20 @@ describe('Ymir install plugin', () => {
 
         const [newFile] = await file.getYmirFileAsObject(
           ymirPath,
-          nodePath.join('plugins', 'ts'),
+          nodePath.join('plugins', 'env'),
           false
         );
 
-        newFile.LOCATION.path = newFile.LOCATION.path
-          .trim()
-          .split('vor-app/')[1];
+        newFile.LOCATION.path = newFile.LOCATION.path.trim().split('ymir/')[1];
 
         expect(err).toBeNull();
         expect(newFile.DESCRIBE).toEqual({
-          alias: 'ts',
-          'pk_name?': 'typescript',
+          alias: 'env',
+          'pk_name?': 'dotenv',
         });
         expect(newFile.LOCATION).toEqual({
-          path: 'libs/ymir-core-cli/node_modules/typescript',
-          'install_cmd?': 'npm i -D typescript',
+          path: 'packages/ymir-core-cli/node_modules/dotenv',
+          'install_cmd?': 'npm i -D dotenv',
           'is_global?': false,
         });
       });
@@ -83,7 +81,7 @@ describe('Ymir install plugin', () => {
         expect(before).toEqual(existingTestPluginFile);
         const pathToLocalPlugin = nodePath.join(
           __dirname,
-          '../../../../node_modules/typescript'
+          '../../../../node_modules/dotenv'
         );
         const alias = 'test';
         const [err, result] = await install.installPluginWithPath(
@@ -99,25 +97,23 @@ describe('Ymir install plugin', () => {
           false
         );
 
-        newFile.LOCATION.path = newFile.LOCATION.path
-          .trim()
-          .split('vor-app/')[1];
+        newFile.LOCATION.path = newFile.LOCATION.path.trim().split('ymir/')[1];
 
         expect(err).toBeNull();
         expect(newFile.DESCRIBE).toEqual({
           alias: 'test',
-          'pk_name?': 'typescript',
+          'pk_name?': 'dotenv',
         });
         expect(newFile.LOCATION).toEqual({
-          path: 'libs/ymir-core-cli/node_modules/typescript',
-          'install_cmd?': 'npm i -D typescript',
+          path: 'packages/ymir-core-cli/node_modules/dotenv',
+          'install_cmd?': 'npm i -D dotenv',
           'is_global?': false,
         });
       });
       it('Should error on install plugin with path when path is invalid', async () => {
         const invalidPath = nodePath.join(
           __dirname,
-          '../../node_modules/typescript'
+          '../../node_modules/dotenv'
         );
         const alias = 'error';
         const [err, result] = await install.installPluginWithPath(

@@ -33,12 +33,12 @@ describe('Ymir parse plugin', () => {
       confDevAltered.DEFAULT_RESOLVER = {};
       confDevAltered.DEFAULT_RESOLVER.name = 'gcp-secret-manager';
       confDevAltered.DEFAULT_RESOLVER.path =
-        './node_modules/@vor/ymir-resolver-gcp-secret-manager';
+        './node_modules/@onevor/ymir-resolver-gcp-secret-manager';
       [confProdAltered] = trans.parseStackFile(configFiles[2]);
       confProdAltered.DEFAULT_RESOLVER = {};
       confProdAltered.DEFAULT_RESOLVER.name = 'azure-key-vault';
       confProdAltered.DEFAULT_RESOLVER.path =
-        './node_modules/@vor/ymir-resolver-azure-key-vault';
+        './node_modules/@onevor/ymir-resolver-azure-key-vault';
 
       configAltered = [
         configFiles[0],
@@ -123,8 +123,8 @@ describe('Ymir parse plugin', () => {
     //           alias: 'ssm',
     //         },
     //         LOCATION: {
-    //           path: './node_modules/@vor/ymir-resolver-ssm',
-    //           'install_cmd?': 'npm install @vor/ymir-resolver-ssm',
+    //           path: './node_modules/@onevor/ymir-resolver-ssm',
+    //           'install_cmd?': 'npm install @onevor/ymir-resolver-ssm',
     //           'isGlobal?': false,
     //         },
     //       });
@@ -134,8 +134,8 @@ describe('Ymir parse plugin', () => {
     //           alias: 'azure-key-vault',
     //         },
     //         LOCATION: {
-    //           path: './node_modules/@vor/ymir-resolver-azure-key-vault',
-    //           'install_cmd?': 'npm install @vor/ymir-resolver-azure-key-vault',
+    //           path: './node_modules/@onevor/ymir-resolver-azure-key-vault',
+    //           'install_cmd?': 'npm install @onevor/ymir-resolver-azure-key-vault',
     //           'isGlobal?': false,
     //         },
     //       });
@@ -145,9 +145,9 @@ describe('Ymir parse plugin', () => {
     //           alias: 'gcp-secret-manager',
     //         },
     //         LOCATION: {
-    //           path: './node_modules/@vor/ymir-resolver-gcp-secret-manager',
+    //           path: './node_modules/@onevor/ymir-resolver-gcp-secret-manager',
     //           'install_cmd?':
-    //             'npm install @vor/ymir-resolver-gcp-secret-manager',
+    //             'npm install @onevor/ymir-resolver-gcp-secret-manager',
     //           'isGlobal?': false,
     //         },
     //       });
