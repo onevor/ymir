@@ -1,0 +1,65 @@
+{
+  "name": "ymir-plugin-ssm",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ymir-plugin-ssm/src",
+  "projectType": "library",
+  "targets": {
+    "destInstall": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm install",
+        "cwd": "dist/ymir-plugin-ssm"
+      }
+    },
+    "chmod": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "chmod +x ./index.js",
+        "cwd": "dist/ymir-plugin-ssm/src/bin"
+      },
+      "dependsOn": ["destInstall"]
+    },
+    "install": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm install",
+        "cwd": "packages/ymir-plugin-ssm"
+      }
+    },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/ymir-plugin-ssm",
+        "main": "packages/ymir-plugin-ssm/src/index.ts",
+        "tsConfig": "packages/ymir-plugin-ssm/tsconfig.lib.json"
+      },
+      "dependsOn": ["install"]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm publish --access public"],
+        "cwd": "dist/ymir-plugin-ssm",
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/ymir-plugin-ssm/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/ymir-plugin-ssm/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

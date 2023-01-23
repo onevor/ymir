@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@onevor/ymir-core-cli": ["packages/ymir-core-cli/src/index.ts"]
+      "@onevor/ymir-core-cli": ["packages/ymir-core-cli/src/index.ts"],
+      "@onevor/ymir-plugin-ssm": ["packages/ymir-plugin-ssm/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
