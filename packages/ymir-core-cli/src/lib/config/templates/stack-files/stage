@@ -1,0 +1,9 @@
+[DESCRIBE]
+  description?: This is the stack to use for the development environment
+
+[SERVER_URL]
+  path: /stage/test/secure/port
+  description?: Url to connect to the running proxy server
+
+[TEST_VAR]
+  path: /stage/test/secure/port
