@@ -78,9 +78,6 @@ describe('Ymir edit stack', () => {
 
         const after = await helper.getStackData(ymirPath, currentStack);
 
-        await fs.writeFile(nodePath.join(__dirname, 'before-e.txt'), before);
-        await fs.writeFile(nodePath.join(__dirname, 'after-e.txt'), after);
-
         const beforeLines = before.split('\n');
         const afterLines = after.split('\n');
 
