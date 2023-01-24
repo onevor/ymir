@@ -322,19 +322,40 @@ export async function remove(args: any, ctx: any) {
 export async function create(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const subCommandDef = [{ name: 'command', defaultOption: true }];
+
+  const subMain = commandLineArgs(subCommandDef, {
+    stopAtFirstUnknown: true,
+    argv: args,
+  });
+
+  const subArgs = subMain._unknown || [];
+  const nameCommand = subMain.command;
+
   const def = [{ name: 'name', alias: 'n', type: String }, help.def];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Create a new stack');
+    return help.log(
+      def,
+      'Create a new stack',
+      help.getUsageText('create', '<stack-name>')
+    );
   }
 
-  const { name } = opt;
+  if (opt.name && nameCommand) {
+    console.warn(
+      `Provided two names, ignoring ${opt.name}, and using ${nameCommand}\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]\n\n\tDo not combine the two`
+    );
+  }
 
-  const [isValid, valMessage] = validateRequiredProps(opt, ['name'], ctx);
+  const name = nameCommand || opt.name;
 
-  if (!isValid) {
-    console.error(valMessage);
+  if (!name) {
+    console.error(
+      `Invalid command: missing stack name to create\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]`
+    );
     return;
   }
 
