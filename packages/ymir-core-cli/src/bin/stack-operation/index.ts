@@ -283,27 +283,50 @@ export async function update(args: any, ctx: any) {
 export async function remove(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const subCommandDef = [{ name: 'command', defaultOption: true }];
+
+  const subMain = commandLineArgs(subCommandDef, {
+    stopAtFirstUnknown: true,
+    argv: args,
+  });
+
+  const subArgs = subMain._unknown || [];
+  const keyCommand = subMain.command;
+
   const def = [
     { name: 'key', alias: 'k', type: String },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Remove a property from a stack');
+    return help.log(
+      def,
+      'Remove a property from a stack',
+      help.getUsageText('remove', '<key>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(opt, ['key'], ctx);
+  if (opt.key && keyCommand) {
+    console.warn(
+      `Provided two keys to remove, ignoring ${opt.key}, and using ${keyCommand}\n\tymir remove <key>\n\tOR\n\tymir remove -k [key]\n\n\tDo not combine the two`
+    );
+  }
 
-  if (!isValid) {
-    console.error(valMessage);
+  const key = keyCommand || opt.key;
+
+  if (!key) {
+    console.error(
+      `Invalid command: missing property key to remove\n\tymir remove <key>\n\tOR\n\tymir remove -k [key]`
+    );
     return;
   }
 
   const prop: any = {
-    key: formatKey(opt.key),
+    key: formatKey(key),
   };
 
   // prop.content = { ...parseContentFromOpt(opt, ctx) };
