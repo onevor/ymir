@@ -166,6 +166,17 @@ export async function stack(args: any, ctx: any) {
 export async function add(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const subCommandDef = [{ name: 'command', defaultOption: true }];
+
+  const subMain = commandLineArgs(subCommandDef, {
+    stopAtFirstUnknown: true,
+    argv: args,
+  });
+
+  const subArgs = subMain._unknown || [];
+  const keyCommand = subMain.command;
+
   const def = [
     {
       name: 'key',
@@ -201,25 +212,40 @@ export async function add(args: any, ctx: any) {
     },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Add a new property to a stack');
+    return help.log(
+      def,
+      'Add a new property to a stack',
+      help.getUsageText('add', '<key>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(
-    opt,
-    ['key', 'path'],
-    ctx
-  );
+  if (opt.key && keyCommand) {
+    console.warn(
+      `Provided two keys to add, ignoring ${opt.key}, and using ${keyCommand}\n\tymir add <key>\n\tOR\n\tymir add -k [key]\n\n\tDo not combine the two`
+    );
+  }
+
+  const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
 
   if (!isValid) {
     console.error(valMessage);
     return;
   }
 
+  const key = keyCommand || opt.key;
+
+  if (!key) {
+    console.error(
+      `Invalid command: missing property key to add\n\tymir add <key>\n\tOR\n\tymir add -k [key]`
+    );
+    return;
+  }
+
   const prop: any = {
-    key: formatKey(opt.key),
+    key: formatKey(key),
   };
 
   const options = {
