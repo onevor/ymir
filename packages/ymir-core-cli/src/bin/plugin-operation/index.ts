@@ -3,7 +3,7 @@ import * as commandLineArgs from 'command-line-args';
 import * as helper from '../../lib/config/helper';
 import * as installLib from '../../lib/resolve/lib/resolver-operations/install';
 
-import { isInProject, validateRequiredProps } from '../lib/index';
+import { isInProject, validateRequiredProps, helperDef } from '../lib/index';
 
 /**
  * If you install the same path with different names
@@ -20,6 +20,7 @@ export async function install(args: any, ctx: any) {
     { name: 'install', alias: 'i', type: Boolean },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'path', alias: 'p', type: String },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 

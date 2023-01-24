@@ -1,14 +1,8 @@
-import * as commandLineArgs from 'command-line-args';
-
-import { init } from '../../lib/config/init';
 import * as helper from '../../lib/config/helper';
-import { checkoutStack } from '../../lib/config/stack-operations/checkout';
-import { createNewStack } from '../../lib/config/stack-operations/create-stack';
-import { removeStack } from '../../lib/config/stack-operations/remove-stack';
-import * as edit from '../../lib/config/stack-operations/edit-stack-file';
-import * as install from '../../lib/resolve/lib/resolver-operations/install';
 
 export const formatKey = (key: string) => key.trim().toUpperCase();
+
+export const helperDef = { name: 'help', alias: 'h', type: Boolean };
 
 export async function isInProject(exitIfNot = false, ctx: any) {
   const { cwd } = ctx;

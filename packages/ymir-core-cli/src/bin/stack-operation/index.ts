@@ -12,6 +12,7 @@ import {
   parseContentFromOpt,
   validateRequiredProps,
   formatKey,
+  helperDef,
 } from '../lib/index';
 
 export async function init(args: any, ctx: any) {
@@ -19,6 +20,7 @@ export async function init(args: any, ctx: any) {
   const def = [
     { name: 'relativePath', alias: 'p', type: String },
     { name: 'absolutePath', alias: 'f', type: String },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 
@@ -32,6 +34,7 @@ export async function checkoutStack(args: any, ctx: any) {
     console.error('Not in a ymir project');
     return;
   }
+  // TODO: add helper here too?
   const subCommandDef = [{ name: 'command', defaultOption: true }];
 
   const subMain = commandLineArgs(subCommandDef, {
@@ -48,6 +51,7 @@ export async function checkoutStack(args: any, ctx: any) {
   const def = [
     { name: 'name', alias: 'n', type: String },
     { name: 'create', alias: 'c', type: Boolean },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: subArgs });
 
@@ -88,6 +92,7 @@ export async function stack(args: any, ctx: any) {
   const def = [
     { name: 'list', alias: 'l', type: Boolean },
     { name: 'path', alias: 'p', type: Boolean },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 
@@ -131,6 +136,7 @@ export async function add(args: any, ctx: any) {
     { name: 'required', alias: 'q', type: Boolean },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 
@@ -172,6 +178,7 @@ export async function update(args: any, ctx: any) {
     { name: 'required', alias: 'q', type: Boolean },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 
@@ -209,6 +216,7 @@ export async function remove(args: any, ctx: any) {
     { name: 'key', alias: 'k', type: String },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 
@@ -239,7 +247,7 @@ export async function remove(args: any, ctx: any) {
 export async function create(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
-  const def = [{ name: 'name', alias: 'n', type: String }];
+  const def = [{ name: 'name', alias: 'n', type: String }, helperDef];
   const opt = commandLineArgs(def, { argv: args });
 
   const { name } = opt;
@@ -268,6 +276,7 @@ export async function deleteStack(args: any, ctx: any) {
     { name: 'name', alias: 'n', type: String },
     { name: 'force', alias: 'f', type: Boolean },
     { name: 'checkout', alias: 'c', type: String },
+    helperDef,
   ];
   const opt = commandLineArgs(def, { argv: args });
 
