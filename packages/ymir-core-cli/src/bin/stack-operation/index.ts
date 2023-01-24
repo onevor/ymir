@@ -12,6 +12,7 @@ import {
   parseContentFromOpt,
   validateRequiredProps,
   formatKey,
+  parseSubCommand,
 } from '../lib/index';
 
 import * as help from '../lib/help';
@@ -46,15 +47,7 @@ export async function checkoutStack(args: any, ctx: any) {
     return;
   }
   // TODO: add helper here too?
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const nameCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   /**
    * TODO: options to copy data from existing stack on create
@@ -84,13 +77,13 @@ export async function checkoutStack(args: any, ctx: any) {
     );
   }
 
-  if (opt.name && nameCommand) {
+  if (opt.name && subCommand) {
     console.warn(
-      `Provided two names for checkout, ignoring ${opt.name}, and using ${nameCommand}\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]\n\n\tDo not combine the two`
+      `Provided two names for checkout, ignoring ${opt.name}, and using ${subCommand}\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]\n\n\tDo not combine the two`
     );
   }
 
-  const name = nameCommand || opt.name;
+  const name = subCommand || opt.name;
 
   if (!name) {
     console.error(
@@ -166,6 +159,8 @@ export async function stack(args: any, ctx: any) {
 export async function add(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+  const { subCommand, subArgs } = parseSubCommand(args);
+
   const def = [
     {
       name: 'key',
@@ -201,25 +196,40 @@ export async function add(args: any, ctx: any) {
     },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Add a new property to a stack');
+    return help.log(
+      def,
+      'Add a new property to a stack',
+      help.getUsageText('add', '<key>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(
-    opt,
-    ['key', 'path'],
-    ctx
-  );
+  if (opt.key && subCommand) {
+    console.warn(
+      `Provided two keys to add, ignoring ${opt.key}, and using ${subCommand}\n\tymir add <key>\n\tOR\n\tymir add -k [key]\n\n\tDo not combine the two`
+    );
+  }
+
+  const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
 
   if (!isValid) {
     console.error(valMessage);
     return;
   }
 
+  const key = subCommand || opt.key;
+
+  if (!key) {
+    console.error(
+      `Invalid command: missing property key to add\n\tymir add <key>\n\tOR\n\tymir add -k [key]`
+    );
+    return;
+  }
+
   const prop: any = {
-    key: formatKey(opt.key),
+    key: formatKey(key),
   };
 
   const options = {
@@ -237,6 +247,9 @@ export async function add(args: any, ctx: any) {
 export async function update(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const { subCommand, subArgs } = parseSubCommand(args);
+
   const def = [
     { name: 'key', alias: 'k', type: String },
     { name: 'path', alias: 'p', type: String },
@@ -247,24 +260,39 @@ export async function update(args: any, ctx: any) {
     { name: 'stack', alias: 's', type: String },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Update a property in a stack');
+    return help.log(
+      def,
+      'Update a property in a stack',
+      help.getUsageText('update', '<key>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(
-    opt,
-    ['key', 'path'],
-    ctx
-  );
+  if (opt.key && subCommand) {
+    console.warn(
+      `Provided two keys to update, ignoring ${opt.key}, and using ${subCommand}\n\tymir update <key>\n\tOR\n\tymir update -k [key]\n\n\tDo not combine the two`
+    );
+  }
+
+  const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
   if (!isValid) {
     console.error(valMessage);
     return;
   }
 
+  const key = subCommand || opt.key;
+
+  if (!key) {
+    console.error(
+      `Invalid command: missing property key to update\n\tymir update <key>\n\tOR\n\tymir update -k [key]`
+    );
+    return;
+  }
+
   const prop: any = {
-    key: formatKey(opt.key),
+    key: formatKey(key),
   };
 
   prop.content = { ...parseContentFromOpt(opt, ctx) };
@@ -283,27 +311,42 @@ export async function update(args: any, ctx: any) {
 export async function remove(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const { subCommand, subArgs } = parseSubCommand(args);
+
   const def = [
     { name: 'key', alias: 'k', type: String },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Remove a property from a stack');
+    return help.log(
+      def,
+      'Remove a property from a stack',
+      help.getUsageText('remove', '<key>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(opt, ['key'], ctx);
+  if (opt.key && subCommand) {
+    console.warn(
+      `Provided two keys to remove, ignoring ${opt.key}, and using ${subCommand}\n\tymir remove <key>\n\tOR\n\tymir remove -k [key]\n\n\tDo not combine the two`
+    );
+  }
 
-  if (!isValid) {
-    console.error(valMessage);
+  const key = subCommand || opt.key;
+
+  if (!key) {
+    console.error(
+      `Invalid command: missing property key to remove\n\tymir remove <key>\n\tOR\n\tymir remove -k [key]`
+    );
     return;
   }
 
   const prop: any = {
-    key: formatKey(opt.key),
+    key: formatKey(key),
   };
 
   // prop.content = { ...parseContentFromOpt(opt, ctx) };
@@ -322,19 +365,32 @@ export async function remove(args: any, ctx: any) {
 export async function create(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const { subCommand, subArgs } = parseSubCommand(args);
+
   const def = [{ name: 'name', alias: 'n', type: String }, help.def];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Create a new stack');
+    return help.log(
+      def,
+      'Create a new stack',
+      help.getUsageText('create', '<stack-name>')
+    );
   }
 
-  const { name } = opt;
+  if (opt.name && subCommand) {
+    console.warn(
+      `Provided two names, ignoring ${opt.name}, and using ${subCommand}\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]\n\n\tDo not combine the two`
+    );
+  }
 
-  const [isValid, valMessage] = validateRequiredProps(opt, ['name'], ctx);
+  const name = subCommand || opt.name;
 
-  if (!isValid) {
-    console.error(valMessage);
+  if (!name) {
+    console.error(
+      `Invalid command: missing stack name to create\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]`
+    );
     return;
   }
 
@@ -351,26 +407,39 @@ export async function create(args: any, ctx: any) {
 export async function deleteStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const { subCommand, subArgs } = parseSubCommand(args);
+
   const def = [
     { name: 'name', alias: 'n', type: String },
     { name: 'force', alias: 'f', type: Boolean },
     { name: 'checkout', alias: 'c', type: String },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Delete a stack');
+    return help.log(
+      def,
+      'Delete a stack',
+      help.getUsageText('delete', '<stack-name>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(opt, ['name'], ctx);
+  if (opt.name && subCommand) {
+    console.warn(
+      `Provided two names for delete, ignoring ${opt.name}, and using ${subCommand}\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]\n\n\tDo not combine the two`
+    );
+  }
 
-  if (!isValid) {
-    console.error(valMessage);
+  const name = subCommand || opt.name;
+
+  if (!name) {
+    console.error(
+      `Invalid command: missing stack name to delete\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]`
+    );
     return;
   }
-
-  const { name } = opt;
 
   if (name === 'default') {
     console.error('Can not delete the default stack');

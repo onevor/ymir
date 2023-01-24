@@ -1,3 +1,5 @@
+import * as commandLineArgs from 'command-line-args';
+
 import * as helper from '../../lib/config/helper';
 
 export const formatKey = (key: string) => key.trim().toUpperCase();
@@ -57,4 +59,18 @@ export function validateRequiredProps(opt: any, required: string[], ctx: any) {
   if (missing.length === 0) return [true, null];
 
   return [false, `Missing required properties: ${missing.join(', ')}`];
+}
+
+export function parseSubCommand(args: any) {
+  const subCommandDef = [{ name: 'command', defaultOption: true }];
+
+  const subMain = commandLineArgs(subCommandDef, {
+    stopAtFirstUnknown: true,
+    argv: args,
+  });
+
+  const subArgs = subMain._unknown || [];
+  const subCommand = subMain.command;
+
+  return { subCommand, subArgs };
 }
