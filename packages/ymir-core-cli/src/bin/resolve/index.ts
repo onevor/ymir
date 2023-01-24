@@ -9,6 +9,7 @@ import * as check from '../../lib/resolve/check-install';
 import * as resolverLib from '../../lib/resolve/lib/resolver-operations/resolve-stack';
 
 import { isInProject } from '../lib/index';
+import * as help from '../lib/help';
 
 import { entriesToEnvFile } from '../../lib/dotfile';
 
@@ -16,8 +17,12 @@ export async function exportStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
 
-  const def = [{ name: 'stack', alias: 's', type: String }];
+  const def = [{ name: 'stack', alias: 's', type: String }, help.def];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Export a stack to a .env file');
+  }
 
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
 

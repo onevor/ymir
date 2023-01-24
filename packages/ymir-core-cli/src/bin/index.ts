@@ -14,6 +14,8 @@ import {
 import { install } from './plugin-operation';
 import { exportStack } from './resolve';
 
+import * as help from './lib/help';
+
 const cwd = process.cwd();
 
 const mainDefinitions = [{ name: 'command', defaultOption: true }];
@@ -44,6 +46,12 @@ const commands = {
 };
 
 async function main() {
+  if (!mainOptions.command) {
+    const isInHelp = argv.includes('--help') || argv.includes('-h');
+    const header = isInHelp ? '' : help.missingCommandError;
+    return help.logMain(Object.keys(commands), header);
+  }
+
   const ctx = {
     cwd,
     mainOptions,

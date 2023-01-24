@@ -4,21 +4,6 @@
   "sourceRoot": "packages/ymir-plugin-ssm/src",
   "projectType": "library",
   "targets": {
-    "destInstall": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npm install",
-        "cwd": "dist/ymir-plugin-ssm"
-      }
-    },
-    "chmod": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "chmod +x ./index.js",
-        "cwd": "dist/ymir-plugin-ssm/src/bin"
-      },
-      "dependsOn": ["destInstall"]
-    },
     "install": {
       "executor": "nx:run-commands",
       "options": {

@@ -14,13 +14,26 @@ import {
   formatKey,
 } from '../lib/index';
 
+import * as help from '../lib/help';
+
+/**
+ * TODO:
+ * - a lot of the def is the same, should have one def for props that are equal
+ * - Need to have consistent descriptions, for help;
+ */
+
 export async function init(args: any, ctx: any) {
   const { cwd } = ctx;
   const def = [
     { name: 'relativePath', alias: 'p', type: String },
     { name: 'absolutePath', alias: 'f', type: String },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Init a new ymir project');
+  }
 
   return initLib.init(cwd, opt.relativePath, opt.absolutePath);
 }
@@ -32,6 +45,7 @@ export async function checkoutStack(args: any, ctx: any) {
     console.error('Not in a ymir project');
     return;
   }
+  // TODO: add helper here too?
   const subCommandDef = [{ name: 'command', defaultOption: true }];
 
   const subMain = commandLineArgs(subCommandDef, {
@@ -46,10 +60,29 @@ export async function checkoutStack(args: any, ctx: any) {
    * TODO: options to copy data from existing stack on create
    */
   const def = [
-    { name: 'name', alias: 'n', type: String },
-    { name: 'create', alias: 'c', type: Boolean },
+    {
+      name: 'name',
+      alias: 'n',
+      type: String,
+      description: 'Alias for name to check out',
+    },
+    {
+      name: 'create',
+      alias: 'c',
+      type: Boolean,
+      description: 'Create a new stack',
+    },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: subArgs });
+
+  if (opt.help) {
+    return help.log(
+      def,
+      'Checkout a stack',
+      help.getUsageText('checkout', '<stack-name>')
+    );
+  }
 
   if (opt.name && nameCommand) {
     console.warn(
@@ -86,10 +119,20 @@ export async function stack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
   const def = [
-    { name: 'list', alias: 'l', type: Boolean },
-    { name: 'path', alias: 'p', type: Boolean },
+    { name: 'list', alias: 'l', type: Boolean, description: 'List all stacks' },
+    {
+      name: 'path',
+      alias: 'p',
+      type: Boolean,
+      description: 'Show file path to stack',
+    },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Get information about stack(s)');
+  }
 
   const stacks = [];
 
@@ -124,15 +167,45 @@ export async function add(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
   const def = [
-    { name: 'key', alias: 'k', type: String },
-    { name: 'path', alias: 'p', type: String },
+    {
+      name: 'key',
+      alias: 'k',
+      type: String,
+      description: 'The name of the parameter to add',
+    },
+    {
+      name: 'path',
+      alias: 'p',
+      type: String,
+      description: 'The path the resolver should use to fetch the value',
+    },
     { name: 'description', alias: 'd', type: String },
-    { name: 'resolver', alias: 'r', type: String },
+    {
+      name: 'resolver',
+      alias: 'r',
+      type: String,
+      description: 'The alias name for the resolver',
+    },
     { name: 'required', alias: 'q', type: Boolean },
-    { name: 'global', alias: 'g', type: Boolean },
-    { name: 'stack', alias: 's', type: String },
+    {
+      name: 'global',
+      alias: 'g',
+      type: Boolean,
+      description: 'Add to the default stack',
+    },
+    {
+      name: 'stack',
+      alias: 's',
+      type: String,
+      description: 'Add to a specific stack, other then the checked out stack',
+    },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Add a new property to a stack');
+  }
 
   const [isValid, valMessage] = validateRequiredProps(
     opt,
@@ -172,8 +245,13 @@ export async function update(args: any, ctx: any) {
     { name: 'required', alias: 'q', type: Boolean },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Update a property in a stack');
+  }
 
   const [isValid, valMessage] = validateRequiredProps(
     opt,
@@ -209,8 +287,13 @@ export async function remove(args: any, ctx: any) {
     { name: 'key', alias: 'k', type: String },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'stack', alias: 's', type: String },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Remove a property from a stack');
+  }
 
   const [isValid, valMessage] = validateRequiredProps(opt, ['key'], ctx);
 
@@ -239,8 +322,12 @@ export async function remove(args: any, ctx: any) {
 export async function create(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
-  const def = [{ name: 'name', alias: 'n', type: String }];
+  const def = [{ name: 'name', alias: 'n', type: String }, help.def];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Create a new stack');
+  }
 
   const { name } = opt;
 
@@ -268,8 +355,13 @@ export async function deleteStack(args: any, ctx: any) {
     { name: 'name', alias: 'n', type: String },
     { name: 'force', alias: 'f', type: Boolean },
     { name: 'checkout', alias: 'c', type: String },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Delete a stack');
+  }
 
   const [isValid, valMessage] = validateRequiredProps(opt, ['name'], ctx);
 

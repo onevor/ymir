@@ -5,6 +5,8 @@ import * as installLib from '../../lib/resolve/lib/resolver-operations/install';
 
 import { isInProject, validateRequiredProps } from '../lib/index';
 
+import * as help from '../lib/help';
+
 /**
  * If you install the same path with different names
  * it will create a new file, and not remove the old one
@@ -20,8 +22,13 @@ export async function install(args: any, ctx: any) {
     { name: 'install', alias: 'i', type: Boolean },
     { name: 'global', alias: 'g', type: Boolean },
     { name: 'path', alias: 'p', type: String },
+    help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(def, 'Install a plugin');
+  }
 
   const [isValid, valMessage] = validateRequiredProps(opt, ['alias'], ctx);
 
