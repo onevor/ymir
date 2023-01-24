@@ -372,26 +372,47 @@ export async function create(args: any, ctx: any) {
 export async function deleteStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
+
+  const subCommandDef = [{ name: 'command', defaultOption: true }];
+
+  const subMain = commandLineArgs(subCommandDef, {
+    stopAtFirstUnknown: true,
+    argv: args,
+  });
+
+  const subArgs = subMain._unknown || [];
+  const nameCommand = subMain.command;
+
   const def = [
     { name: 'name', alias: 'n', type: String },
     { name: 'force', alias: 'f', type: Boolean },
     { name: 'checkout', alias: 'c', type: String },
     help.def,
   ];
-  const opt = commandLineArgs(def, { argv: args });
+  const opt = commandLineArgs(def, { argv: subArgs });
 
   if (opt.help) {
-    return help.log(def, 'Delete a stack');
+    return help.log(
+      def,
+      'Delete a stack',
+      help.getUsageText('delete', '<stack-name>')
+    );
   }
 
-  const [isValid, valMessage] = validateRequiredProps(opt, ['name'], ctx);
+  if (opt.name && nameCommand) {
+    console.warn(
+      `Provided two names for delete, ignoring ${opt.name}, and using ${nameCommand}\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]\n\n\tDo not combine the two`
+    );
+  }
 
-  if (!isValid) {
-    console.error(valMessage);
+  const name = nameCommand || opt.name;
+
+  if (!name) {
+    console.error(
+      `Invalid command: missing stack name to delete\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]`
+    );
     return;
   }
-
-  const { name } = opt;
 
   if (name === 'default') {
     console.error('Can not delete the default stack');
