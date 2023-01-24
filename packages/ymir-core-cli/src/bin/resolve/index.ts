@@ -8,7 +8,8 @@ import * as trans from '../../lib/config/parser/transpiler';
 import * as check from '../../lib/resolve/check-install';
 import * as resolverLib from '../../lib/resolve/lib/resolver-operations/resolve-stack';
 
-import { isInProject, helperDef } from '../lib/index';
+import { isInProject } from '../lib/index';
+import * as help from '../lib/help';
 
 import { entriesToEnvFile } from '../../lib/dotfile';
 
@@ -16,7 +17,7 @@ export async function exportStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
 
-  const def = [{ name: 'stack', alias: 's', type: String }, helperDef];
+  const def = [{ name: 'stack', alias: 's', type: String }, help.def];
   const opt = commandLineArgs(def, { argv: args });
 
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
