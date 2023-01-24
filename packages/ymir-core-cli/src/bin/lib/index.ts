@@ -2,8 +2,6 @@ import * as helper from '../../lib/config/helper';
 
 export const formatKey = (key: string) => key.trim().toUpperCase();
 
-export const helperDef = { name: 'help', alias: 'h', type: Boolean };
-
 export async function isInProject(exitIfNot = false, ctx: any) {
   const { cwd } = ctx;
   const inProject = await helper.projectExists(cwd);
