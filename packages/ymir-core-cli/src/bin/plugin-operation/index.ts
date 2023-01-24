@@ -26,6 +26,10 @@ export async function install(args: any, ctx: any) {
   ];
   const opt = commandLineArgs(def, { argv: args });
 
+  if (opt.help) {
+    return help.log(def, 'Install a plugin');
+  }
+
   const [isValid, valMessage] = validateRequiredProps(opt, ['alias'], ctx);
 
   if (!isValid) {

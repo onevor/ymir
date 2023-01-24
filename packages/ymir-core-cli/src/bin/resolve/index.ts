@@ -20,6 +20,10 @@ export async function exportStack(args: any, ctx: any) {
   const def = [{ name: 'stack', alias: 's', type: String }, help.def];
   const opt = commandLineArgs(def, { argv: args });
 
+  if (opt.help) {
+    return help.log(def, 'Export a stack to a .env file');
+  }
+
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
 
   const stackName = opt.stack || (await fs.getCurrentStackName(ymirPath));
