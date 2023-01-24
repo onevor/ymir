@@ -12,6 +12,7 @@ import {
   parseContentFromOpt,
   validateRequiredProps,
   formatKey,
+  parseSubCommand,
 } from '../lib/index';
 
 import * as help from '../lib/help';
@@ -46,15 +47,7 @@ export async function checkoutStack(args: any, ctx: any) {
     return;
   }
   // TODO: add helper here too?
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const nameCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   /**
    * TODO: options to copy data from existing stack on create
@@ -84,13 +77,13 @@ export async function checkoutStack(args: any, ctx: any) {
     );
   }
 
-  if (opt.name && nameCommand) {
+  if (opt.name && subCommand) {
     console.warn(
-      `Provided two names for checkout, ignoring ${opt.name}, and using ${nameCommand}\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]\n\n\tDo not combine the two`
+      `Provided two names for checkout, ignoring ${opt.name}, and using ${subCommand}\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]\n\n\tDo not combine the two`
     );
   }
 
-  const name = nameCommand || opt.name;
+  const name = subCommand || opt.name;
 
   if (!name) {
     console.error(
@@ -166,16 +159,7 @@ export async function stack(args: any, ctx: any) {
 export async function add(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
-
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const keyCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   const def = [
     {
@@ -222,9 +206,9 @@ export async function add(args: any, ctx: any) {
     );
   }
 
-  if (opt.key && keyCommand) {
+  if (opt.key && subCommand) {
     console.warn(
-      `Provided two keys to add, ignoring ${opt.key}, and using ${keyCommand}\n\tymir add <key>\n\tOR\n\tymir add -k [key]\n\n\tDo not combine the two`
+      `Provided two keys to add, ignoring ${opt.key}, and using ${subCommand}\n\tymir add <key>\n\tOR\n\tymir add -k [key]\n\n\tDo not combine the two`
     );
   }
 
@@ -235,7 +219,7 @@ export async function add(args: any, ctx: any) {
     return;
   }
 
-  const key = keyCommand || opt.key;
+  const key = subCommand || opt.key;
 
   if (!key) {
     console.error(
@@ -264,15 +248,7 @@ export async function update(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
 
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const keyCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   const def = [
     { name: 'key', alias: 'k', type: String },
@@ -294,9 +270,9 @@ export async function update(args: any, ctx: any) {
     );
   }
 
-  if (opt.key && keyCommand) {
+  if (opt.key && subCommand) {
     console.warn(
-      `Provided two keys to update, ignoring ${opt.key}, and using ${keyCommand}\n\tymir update <key>\n\tOR\n\tymir update -k [key]\n\n\tDo not combine the two`
+      `Provided two keys to update, ignoring ${opt.key}, and using ${subCommand}\n\tymir update <key>\n\tOR\n\tymir update -k [key]\n\n\tDo not combine the two`
     );
   }
 
@@ -306,7 +282,7 @@ export async function update(args: any, ctx: any) {
     return;
   }
 
-  const key = keyCommand || opt.key;
+  const key = subCommand || opt.key;
 
   if (!key) {
     console.error(
@@ -336,15 +312,7 @@ export async function remove(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
 
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const keyCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   const def = [
     { name: 'key', alias: 'k', type: String },
@@ -362,13 +330,13 @@ export async function remove(args: any, ctx: any) {
     );
   }
 
-  if (opt.key && keyCommand) {
+  if (opt.key && subCommand) {
     console.warn(
-      `Provided two keys to remove, ignoring ${opt.key}, and using ${keyCommand}\n\tymir remove <key>\n\tOR\n\tymir remove -k [key]\n\n\tDo not combine the two`
+      `Provided two keys to remove, ignoring ${opt.key}, and using ${subCommand}\n\tymir remove <key>\n\tOR\n\tymir remove -k [key]\n\n\tDo not combine the two`
     );
   }
 
-  const key = keyCommand || opt.key;
+  const key = subCommand || opt.key;
 
   if (!key) {
     console.error(
@@ -398,15 +366,7 @@ export async function create(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
 
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const nameCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   const def = [{ name: 'name', alias: 'n', type: String }, help.def];
   const opt = commandLineArgs(def, { argv: subArgs });
@@ -419,13 +379,13 @@ export async function create(args: any, ctx: any) {
     );
   }
 
-  if (opt.name && nameCommand) {
+  if (opt.name && subCommand) {
     console.warn(
-      `Provided two names, ignoring ${opt.name}, and using ${nameCommand}\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]\n\n\tDo not combine the two`
+      `Provided two names, ignoring ${opt.name}, and using ${subCommand}\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]\n\n\tDo not combine the two`
     );
   }
 
-  const name = nameCommand || opt.name;
+  const name = subCommand || opt.name;
 
   if (!name) {
     console.error(
@@ -448,15 +408,7 @@ export async function deleteStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
 
-  const subCommandDef = [{ name: 'command', defaultOption: true }];
-
-  const subMain = commandLineArgs(subCommandDef, {
-    stopAtFirstUnknown: true,
-    argv: args,
-  });
-
-  const subArgs = subMain._unknown || [];
-  const nameCommand = subMain.command;
+  const { subCommand, subArgs } = parseSubCommand(args);
 
   const def = [
     { name: 'name', alias: 'n', type: String },
@@ -474,13 +426,13 @@ export async function deleteStack(args: any, ctx: any) {
     );
   }
 
-  if (opt.name && nameCommand) {
+  if (opt.name && subCommand) {
     console.warn(
-      `Provided two names for delete, ignoring ${opt.name}, and using ${nameCommand}\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]\n\n\tDo not combine the two`
+      `Provided two names for delete, ignoring ${opt.name}, and using ${subCommand}\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]\n\n\tDo not combine the two`
     );
   }
 
-  const name = nameCommand || opt.name;
+  const name = subCommand || opt.name;
 
   if (!name) {
     console.error(
