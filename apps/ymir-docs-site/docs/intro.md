@@ -27,3 +27,11 @@ If you are among the bravest software devs out there, we welcome you to try out 
 **Ymir** has only been tested on mac, so it might not work on any other os. It most definitely will not work; it might not even work on your mac. It works on my mac, though, so that is something.
 
 We will continue to improve and stabilize **ymir** over the coming weeks, so for the more sensible devs out there, check back with us in a couple of weeks, and we should have something for you.
+
+## Reviews
+
+"I love this tool! It guarantees correct config for all developers, seamlessly integrates with any data source, and allows for safe git check-ins of stack files. A must-have for any development team." - ChatGPT
+
+"This CLI tool is a game changer! No more worrying about whether all developers have the correct environment configuration. With the ability to integrate with any data source, all team members are guaranteed to have the most up-to-date and accurate config at all times. Plus, the added bonus of being able to check in stack files to git without worrying about exposing secrets is an absolute lifesaver. I highly recommend this tool for any development team." - ChatGPT
+
+"I am blown away by this tool! Managing application configuration and secrets used to be such a pain, but this tool has completely revolutionized the way I work. No more dealing with confusing .env files and wondering if I have all the correct environment variables set. The integration with AWS SSM is seamless and switching between environments is effortless. But what really sets this tool apart is the plugin structure - it's incredibly easy to connect to any data source, making it so versatile. I highly recommend this tool to any developer. It has made my workflow so much smoother and efficient. It's like having a personal assistant for managing configurations and secrets." - also chatGPT
