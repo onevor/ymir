@@ -1,0 +1,50 @@
+{
+  "name": "ymir-plugin-azure-key-vault",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ymir-plugin-azure-key-vault/src",
+  "projectType": "library",
+  "targets": {
+    "install": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm install",
+        "cwd": "packages/ymir-plugin-azure-key-vault"
+      }
+    },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/ymir-plugin-azure-key-vault",
+        "main": "packages/ymir-plugin-azure-key-vault/src/index.ts",
+        "tsConfig": "packages/ymir-plugin-azure-key-vault/tsconfig.lib.json"
+      },
+      "dependsOn": ["install"]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm publish --access public"],
+        "cwd": "dist/ymir-plugin-azure-key-vault",
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/ymir-plugin-azure-key-vault/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/ymir-plugin-azure-key-vault/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

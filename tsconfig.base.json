@@ -16,6 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@onevor/ymir-core-cli": ["packages/ymir-core-cli/src/index.ts"],
+      "@onevor/ymir-plugin-azure-key-vault": [
+        "packages/ymir-plugin-azure-key-vault/src/index.ts"
+      ],
       "@onevor/ymir-plugin-ssm": ["packages/ymir-plugin-ssm/src/index.ts"]
     }
   },
