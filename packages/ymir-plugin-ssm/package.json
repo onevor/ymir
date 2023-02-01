@@ -1,6 +1,6 @@
 {
   "name": "@onevor/ymir-plugin-ssm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Ymir resolver for AWS SSM",
   "main": "./src/index.js",
   "scripts": {
