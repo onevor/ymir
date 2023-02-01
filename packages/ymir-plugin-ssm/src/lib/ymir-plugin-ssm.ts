@@ -53,16 +53,18 @@ export async function resolveOne(
 export async function resolveAll(
   env: BaseProperties[],
   ctx: any
-): Promise<[string, string | null][]> {
+): Promise<[string | null, string | null][]> {
   const ssm = _getClient(ctx);
-  const resolved = env.map(async (props): Promise<[string, string | null]> => {
-    try {
-      const value = await _resolveOne(props, ctx);
-      return [props.key, value];
-    } catch (err) {
-      return [props.key, null];
+  const resolved = env.map(
+    async (props): Promise<[string | null, string | null]> => {
+      try {
+        const value = await _resolveOne(props, ctx);
+        return [props.key || null, value];
+      } catch (err) {
+        return [props.key || null, null];
+      }
     }
-  });
+  );
 
   return Promise.all(resolved);
 }
