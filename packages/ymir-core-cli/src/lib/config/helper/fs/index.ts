@@ -8,7 +8,7 @@ export {
   findNearestFileTop,
   exists,
 } from './exists';
-export { writeFile } from 'fs/promises';
+export { writeFile, readFile } from 'fs/promises';
 
 export async function getCurrentStack(projectPath: string) {
   const path = nodePath.join(projectPath, 'current_stack');

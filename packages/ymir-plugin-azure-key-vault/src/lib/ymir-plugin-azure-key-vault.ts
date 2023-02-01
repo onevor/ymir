@@ -5,14 +5,15 @@ type BaseProperties = {
   path: string;
   key?: string;
   value?: string;
+  config?: any;
 };
 
 type Properties = BaseProperties & { value: string };
 
 let _client: SecretClient;
 function _getClient(ctx: any) {
-  const { vaultName } = ctx;
-  const url = `https://${vaultName}.vault.azure.net`;
+  const { vault_name } = ctx.config;
+  const url = `https://${vault_name}.vault.azure.net`;
 
   if (_client) {
     return _client;
