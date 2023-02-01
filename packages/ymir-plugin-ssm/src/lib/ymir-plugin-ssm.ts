@@ -4,58 +4,75 @@
 
 import { SSM } from './ssm';
 
-export async function _resolve(ssm: SSM, path: string, decrypt = true) {
-  const resolved = await ssm.get(path, decrypt);
+type BaseProperties = {
+  path: string;
+  key?: string;
+  value?: string;
+  config?: any;
+};
+
+type Properties = BaseProperties & { value: string };
+
+let _client: SSM;
+function _getClient(ctx: any): SSM {
+  if (_client) {
+    return _client;
+  }
+  _client = new SSM();
+  return _client;
+}
+
+function _getDecrypt(props: BaseProperties, ctx: any) {
+  const { config } = props;
+  return config?.decrypt ? config.decrypt : true;
+}
+
+export async function _resolveOne(props: BaseProperties, ctx: any) {
+  const { path } = props;
+  const ssm = _getClient(ctx);
+  const resolved = await ssm.get(path, _getDecrypt(props, ctx));
   return resolved;
 }
 
 export async function resolveOne(
-  name: string,
-  properties: any,
-  decrypt = true
-) {
-  const ssm = new SSM();
-  const { path } = properties;
+  props: BaseProperties,
+  ctx: any
+): Promise<string> {
+  const { key, path } = props;
   // TODO: need a vor logger, should be able to suppress this log;
   // console.info(`Resolving ${name} from ssm path: ${path}...`);
   try {
-    const value = await _resolve(ssm, path, decrypt);
-    return [name, value];
+    const value = await _resolveOne(props, ctx);
+    return value;
   } catch (err) {
-    console.error(`Unable to resolve: ${name} from path: ${path}`, err);
-    return [name, null];
+    console.error(`Unable to resolve: ${key} from path: ${path}`, err);
+    return null;
   }
 }
 
-export async function resolveAll(envs: Record<string, any>, decrypt = true) {
-  const ssm = new SSM();
-  const entries = Object.entries(envs);
-  const resolved = await Promise.all(
-    entries.map(async ([name, properties]) => {
-      const { path } = properties;
-      // console.info(`Resolving ${name} from ssm path: ${path}...`);
-      try {
-        const value = await _resolve(ssm, path, decrypt);
-        return [name, value];
-      } catch (err) {
-        return [name, null];
-      }
-    })
-  );
+export async function resolveAll(
+  env: BaseProperties[],
+  ctx: any
+): Promise<[string, string | null][]> {
+  const ssm = _getClient(ctx);
+  const resolved = env.map(async (props): Promise<[string, string | null]> => {
+    try {
+      const value = await _resolveOne(props, ctx);
+      return [props.key, value];
+    } catch (err) {
+      return [props.key, null];
+    }
+  });
 
-  // console.info('Resolved all ssm variables');
-  return resolved;
+  return Promise.all(resolved);
 }
 
-export async function addEnv(key: string, path: string, value: any) {
-  console.error('Not implemented');
-  return key;
+export async function add(props: BaseProperties, ctx: any): Promise<void> {
+  throw new Error('Not implemented');
 }
-export async function removeEnv(key: string, path: string) {
-  console.error('Not implemented');
-  return key;
+export async function update(props: BaseProperties, ctx: any): Promise<void> {
+  throw new Error('Not implemented');
 }
-export async function updateEnv(key: string, path: string, value: any) {
-  console.error('Not implemented');
-  return key;
+export async function remove(props: BaseProperties, ctx: any): Promise<void> {
+  throw new Error('Not implemented');
 }
