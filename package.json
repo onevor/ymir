@@ -1,7 +1,7 @@
 {
   "name": "ymir",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "ISC",
   "scripts": {},
   "private": false,
   "devDependencies": {
