@@ -56,10 +56,10 @@ export async function remove(props: BaseProperties, ctx: any): Promise<void> {
 export async function resolveOne(
   props: BaseProperties,
   ctx: any
-): Promise<string> {
+): Promise<string | null> {
   try {
     const secret = await _resolveOne(props, ctx);
-    return secret.value;
+    return secret.value || null;
   } catch (error) {
     console.error(
       `Unable to resolve: ${props.key} from path: ${props.path}`,
@@ -72,15 +72,17 @@ export async function resolveOne(
 export async function resolveAll(
   env: BaseProperties[],
   ctx: any
-): Promise<[string, string | null][]> {
-  const resolved = env.map(async (props): Promise<[string, string | null]> => {
-    try {
-      const value = await resolveOne(props, ctx);
-      return [props.key, value];
-    } catch (error) {
-      return [props.key, null];
+): Promise<[string | null, string | null][]> {
+  const resolved = env.map(
+    async (props): Promise<[string | null, string | null]> => {
+      try {
+        const value = await resolveOne(props, ctx);
+        return [props.key || null, value];
+      } catch (error) {
+        return [props.key || null, null];
+      }
     }
-  });
+  );
 
   return Promise.all(resolved);
 }
