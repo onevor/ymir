@@ -4,6 +4,7 @@
   "description": "Manage app config and secrets",
   "main": "index.js",
   "private": false,
+  "homepage": "https://onevor.no/",
   "bin": {
     "ymir": "./src/bin/index.js"
   },
@@ -32,7 +33,6 @@
   "bugs": {
     "url": "https://github.com/onevor/ymir/issues"
   },
-  "homepage": "https://github.com/onevor/ymir#readme",
   "devDependencies": {
     "@types/command-line-args": "^5.2.0",
     "@types/node": "^18.11.15",
