@@ -13,6 +13,262 @@ import * as help from '../lib/help';
 
 import { entriesToEnvFile } from '../../lib/dotfile';
 
+async function getStackAndDefault(
+  ymirPath: string,
+  relStackPath: string,
+  relDefaultPath: string
+) {
+  // TODO: I can return the promise here to speed things up.
+  const stackProm = await fs.getFileFromYmir(ymirPath, relStackPath);
+  const defaultProm = await fs.getFileFromYmir(ymirPath, relDefaultPath);
+  return [stackProm, defaultProm];
+}
+
+// TODO: this should standardized and dried up.
+function getRelativePaths(stackName: string) {
+  const stackDir = 'stacks';
+  const stackConfigDir = 'stack-config';
+  const defaultFileName = 'default';
+
+  return {
+    stack: nodePath.join(stackDir, stackName),
+    defaultStack: nodePath.join(stackDir, defaultFileName),
+    config: nodePath.join(stackConfigDir, stackName),
+    defaultConfig: nodePath.join(stackConfigDir, defaultFileName),
+  };
+}
+
+async function getStackAndConfig(ymirPath: string, stackName: string) {
+  const relPaths = getRelativePaths(stackName);
+  const [stack, defaultStack] = await getStackAndDefault(
+    ymirPath,
+    relPaths.stack,
+    relPaths.defaultStack
+  );
+  const [stackConfig, defaultStackConfig] = await getStackAndDefault(
+    ymirPath,
+    relPaths.config,
+    relPaths.defaultConfig
+  );
+  return [stack, defaultStack, stackConfig, defaultStackConfig];
+}
+
+function getDefaultResolver(stackConfig: string, defaultStackConfig: string) {
+  const defaultResolver =
+    check.getDefaultResolverAliasFromConfig(stackConfig) ||
+    check.getDefaultResolverAliasFromConfig(defaultStackConfig);
+
+  if (!defaultResolver) {
+    return [
+      {
+        message: 'No default resolver found in config files',
+      },
+      null,
+    ];
+  }
+  return [null, defaultResolver];
+}
+
+export async function getAndValidateResolverAliasPluginPathMap(
+  ymirPath: string,
+  stackFiles: string[],
+  configFiles: string[]
+): Promise<[any | null, Record<string, string> | null]> {
+  const resolverAliases =
+    await check.getAllResolverNamesFromStackAndConfigFiles(
+      configFiles,
+      stackFiles
+    );
+
+  const pluginPaths = resolverAliases.map((alias) =>
+    nodePath.join(ymirPath, 'plugins', alias)
+  );
+  const missingPlugins = [];
+
+  const pluginExists = await Promise.all(
+    pluginPaths.map(async (path) => fs.exists(path))
+  );
+  pluginExists.forEach((exists, i) => {
+    if (!exists) {
+      missingPlugins.push(resolverAliases[i]);
+    }
+  });
+
+  if (missingPlugins.length !== 0) {
+    return [
+      {
+        code: 'PLUGIN_CONFIG_NOT_FOUND',
+        nrOfMissing: missingPlugins.length,
+        total: resolverAliases.length,
+        missingPlugins,
+      },
+      null,
+    ];
+  }
+
+  const map = resolverAliases.reduce((acc, alias, i) => {
+    acc[alias] = pluginPaths[i];
+    return acc;
+  }, {});
+
+  return [null, map];
+}
+
+export async function getAndValidateResolverAliasInstalledPathMap(
+  aliasPluginPathMap: Record<string, string>
+) {
+  const aliases = Object.keys(aliasPluginPathMap);
+  const paths = Object.values(aliasPluginPathMap);
+  const invalid = [];
+
+  // get files, get path
+  const pluginInstallPaths = await Promise.all(
+    paths.map(async (path) => {
+      try {
+        const file = await fs.readFile(path, 'utf8');
+        const [parsed] = trans.parseStackFile(file);
+        const p = parsed.LOCATION ? parsed.LOCATION.path : null;
+        const pExists = await fs.exists(p);
+        return pExists ? p : null;
+      } catch (error) {
+        return null;
+      }
+    })
+  );
+
+  pluginInstallPaths.forEach((installPath, i) => {
+    if (!installPath) {
+      invalid.push(aliases[i]);
+    }
+  });
+
+  if (invalid.length !== 0) {
+    return [
+      {
+        code: 'INVALID_PLUGIN_INSTALLATION',
+        nrOfInvalid: invalid.length,
+        total: aliases.length,
+        invalidPlugins: invalid,
+      },
+      null,
+    ];
+  }
+
+  const map = aliases.reduce((acc, alias, i) => {
+    acc[alias] = pluginInstallPaths[i];
+    return acc;
+  }, {});
+  return [null, map];
+}
+
+export function getResolverConfigsFromConfigFile(content: string) {
+  const [parsed] = trans.parseStackFile(content);
+  const parsedEntries = Object.entries(parsed);
+  const aliasConfig = {};
+  parsedEntries.forEach(([key, value]) => {
+    if (key.startsWith('RESOLVER_CONFIG')) {
+      const alias =
+        value.alias || key.split('RESOLVER_CONFIG_')[1].toLowerCase();
+      aliasConfig[alias] = value;
+    }
+  });
+  return aliasConfig;
+}
+
+export function mergeResolverConfAndMaps(
+  aliasFileMap,
+  aliasInstalledMap,
+  aliasConfig,
+  defaultAliasConfig
+) {
+  const aliases = Object.keys(aliasFileMap);
+  const conf = {};
+
+  aliases.forEach((alias) => {
+    const file = aliasFileMap[alias];
+    const installed = aliasInstalledMap[alias];
+    const config = aliasConfig[alias] || defaultAliasConfig[alias];
+    conf[alias] = {
+      file,
+      installed,
+      config,
+    };
+  });
+  return conf;
+}
+
+/**
+ * Create the resolver config object;
+ * eg: {
+ *  'aws': {
+ *    file: '/Users/.../ymir/plugins/aws',
+ *    installed: '/Users/.../node_modules/ymir-plugin-aws',
+ *    config: { ... }
+ *  },
+ *  'azure': {
+ *   file: '/Users/.../ymir/plugins/azure',
+ *   ...
+ *  },
+ *  ...
+ * }
+ */
+export async function getResolverConfig(
+  ymirPath: string,
+  stack: string,
+  defaultStack: string,
+  stackConfig: string,
+  defaultStackConfig: string
+) {
+  /**
+   * Create a mapping between the resolver alias and the path to the ymir plugin file;
+   * eg: { 'aws': '/Users/.../ymir/plugins/aws' }
+   */
+  const [aliasPluginFileMapErr, aliasPluginFileMap] =
+    await getAndValidateResolverAliasPluginPathMap(
+      ymirPath,
+      [stack, defaultStack],
+      [stackConfig, defaultStackConfig]
+    );
+
+  if (aliasPluginFileMapErr) return [aliasPluginFileMapErr, null];
+
+  /**
+   * Create a mapping between the resolver alias and the path to the plugin installation;
+   * eg: { 'aws': '/Users/.../node_modules/@onevor/ymir-plugin-aws' }
+   */
+  const [aliasInstalledMapErr, aliasInstalledMap] =
+    await getAndValidateResolverAliasInstalledPathMap(aliasPluginFileMap);
+
+  if (aliasInstalledMapErr) return [aliasInstalledMapErr, null];
+
+  const resolverConfig = getResolverConfigsFromConfigFile(stackConfig);
+  const resolverDefaultConfig =
+    getResolverConfigsFromConfigFile(defaultStackConfig);
+
+  const resolversCof = mergeResolverConfAndMaps(
+    aliasPluginFileMap,
+    aliasInstalledMap,
+    resolverConfig,
+    resolverDefaultConfig
+  );
+
+  return [null, resolversCof];
+}
+
+export function parseFiles(
+  stack: string,
+  defaultStack: string,
+  stackConfig: string,
+  defaultConfig: string
+) {
+  return {
+    stack: trans.parseStackFile(stack)[0],
+    defaultStack: trans.parseStackFile(defaultStack)[0],
+    stackConfig: trans.parseStackFile(stackConfig)[0],
+    defaultConfig: trans.parseStackFile(defaultConfig)[0],
+  };
+}
+
 export async function exportStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
@@ -25,9 +281,7 @@ export async function exportStack(args: any, ctx: any) {
   }
 
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
-
   const stackName = opt.stack || (await fs.getCurrentStackName(ymirPath));
-  console.log(stackName);
   const stackExists = await fs.stackExists(cwd, stackName);
 
   if (!stackExists) {
@@ -35,99 +289,42 @@ export async function exportStack(args: any, ctx: any) {
     return;
   }
 
-  const stackRelativePath = nodePath.join('stacks', stackName);
-  const defaultStackRelativePath = nodePath.join('stacks', 'default');
-  const stackConfRelativePath = nodePath.join('stack-config', stackName);
-  const defaultStackConfRelativePath = nodePath.join('stack-config', 'default');
-
-  console.log('Fetching stack and default stack data');
-  const stackPromise = fs.getFileFromYmir(ymirPath, stackRelativePath);
-  const defaultStackPromise = fs.getFileFromYmir(
-    ymirPath,
-    defaultStackRelativePath
+  const [stack, defaultStack, stackConfig, defaultStackConfig] =
+    await getStackAndConfig(ymirPath, stackName);
+  const [defaultResolverErr, defaultResolver] = getDefaultResolver(
+    stackConfig,
+    defaultStackConfig
   );
 
-  console.log('Fetching config for stack and default stack');
-  const stackConfPromise = fs.getFileFromYmir(ymirPath, stackConfRelativePath);
-  const defaultStackConfPromise = fs.getFileFromYmir(
-    ymirPath,
-    defaultStackConfRelativePath
-  );
-
-  const stacks = await Promise.all([stackPromise, defaultStackPromise]);
-  const stackConf = await Promise.all([
-    stackConfPromise,
-    defaultStackConfPromise,
-  ]);
-
-  const defaultResolver =
-    check.getDefaultResolverAliasFromConfig(stackConf[0]) ||
-    check.getDefaultResolverAliasFromConfig(stackConf[1]);
-
-  if (!defaultResolver) {
-    console.error('No default resolver found in config files');
+  if (defaultResolverErr) {
+    console.error(defaultResolverErr.message);
     return;
   }
 
-  const allResolvers = await check.getAllResolverNamesFromStackAndConfigFiles(
-    stackConf,
-    stacks
-  );
-
-  console.log('Resolvers to load: ', allResolvers);
-  const [pluginsExistsError, pluginExists] = await check.validatePluginsExist(
+  const [resolverConfErr, resolverConf] = await getResolverConfig(
     ymirPath,
-    allResolvers
+    stack,
+    defaultStack,
+    stackConfig,
+    defaultStackConfig
   );
 
-  if (pluginsExistsError) {
-    console.error('Unable to validate resolvers: ', pluginsExistsError);
+  if (resolverConfErr) {
+    console.error('Unable to create resolver config: ', resolverConfErr);
     return;
   }
 
-  const [pathMapError, pathMap] = await check.getPluginPathsMap(
-    ymirPath,
-    allResolvers
-  );
-
-  if (pathMapError) {
-    console.error('Error: ', pathMapError);
-    console.log('Valid paths: ', pathMap);
-    return;
-  }
-
-  console.log('Validating resolvers...');
-  const [pathExistsError, pathExists] = await check.validatePathMap(
-    ymirPath,
-    pathMap
-  );
-
-  if (pathExistsError) {
-    console.error('Unable to validate resolver configs: ', pathExistsError);
-    return;
-  }
-
-  console.log('Got resolver map: ', pathMap);
-  console.log('Resolving stack...');
-  const stackObject = trans.parseStackFile(stacks[0])[0];
-  const defaultStackObject = trans.parseStackFile(stacks[1])[0];
-  const stackConfigObject = trans.parseStackFile(stackConf[0])[0];
-  const defaultStackConfigObject = trans.parseStackFile(stackConf[1])[0];
+  const data = parseFiles(stack, defaultStack, stackConfig, defaultStackConfig);
 
   const resolved = await resolverLib.resolveStack(
     ymirPath,
-    stackObject,
-    defaultStackObject,
+    data,
     defaultResolver,
-    pathMap
+    resolverConf
   );
 
-  // create .env file based on def in stack or default;
-
-  console.log(`Exporting stack ${stackName}...`);
-
   const dotFileData = entriesToEnvFile(resolved);
-  const fileConf = stackConfigObject.FILE || defaultStackConfigObject.FILE;
+  const fileConf = data.stackConfig.FILE || data.defaultConfig.FILE;
 
   if (!fileConf) {
     console.error('No FILE config found in stack or default stack');

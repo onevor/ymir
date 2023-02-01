@@ -6,10 +6,18 @@ import * as keyVault from './ymir-plugin-azure-key-vault';
  * for now you need the az cli to be logged in to run the tests;
  */
 
-jest.setTimeout(200000);
+/**
+ * Key vault is so slow....
+ */
+jest.setTimeout(300000);
+
 describe('Ymir plugin azure key vault', () => {
   const vaultName = 'ymir-test-vault';
-  const ctx = { vaultName };
+  const ctx = {
+    config: {
+      vault_name: vaultName,
+    },
+  };
   const envs = [
     { key: 'PORT', path: 'dev-test-port', value: '3000' },
     { key: 'DEBUG', path: 'dev-test-debug', value: 'true' },

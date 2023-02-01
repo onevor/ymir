@@ -1,45 +1,55 @@
 export async function resolvePropMap(
   ymirPath: string,
   propMap: any,
-  resolverMap: any
+  resolverConfig: any
 ) {
   const entries: [string, any][] = Object.entries(propMap);
   return entries.reduce(async (acc, [key, value]) => {
-    await acc;
-    const resolverInstallPath = resolverMap[key];
-    const resolver = await import(resolverInstallPath);
-    return resolver.resolveAll(value);
-  }, Promise.resolve({}));
+    const result = await acc;
+    const conf = resolverConfig[key];
+    const resolver = await import(conf.installed);
+    const res = await resolver.resolveAll(value, conf);
+    return [...result, ...res];
+  }, Promise.resolve([]));
 }
 
 export async function resolveStack(
   ymirPath: string,
-  stackData: any,
-  defaultStackData: any,
+  data: any,
   defaultResolver: string,
-  resolverMap: Record<string, string>
+  resolverConfig: any
 ) {
   const resolverPropMap = {};
-  const resolvers = Object.keys(resolverMap);
+  const resolvers = Object.keys(resolverConfig);
   resolvers.forEach((name) => {
-    resolverPropMap[name] = {};
+    resolverPropMap[name] = [];
   });
 
-  delete stackData.DESCRIBE;
-  delete defaultStackData.DESCRIBE;
+  delete data.stack.DESCRIBE;
+  delete data.defaultStack.DESCRIBE;
 
   // TODO: Need to make sure that stack data overrides default stack data;
-  const stack = { ...defaultStackData, ...stackData };
+  const stack = { ...data.defaultStack, ...data.stack };
 
   const stackEntries: [string, any][] = Object.entries(stack);
   stackEntries.forEach(([key, value]) => {
     if (Object.hasOwnProperty.call(value, 'resolver?')) {
       const resolver = value['resolver?'];
-      resolverPropMap[resolver][key] = value;
+      resolverPropMap[resolver].push({
+        key,
+        path: value.path,
+        value: value.value,
+        config: value,
+      });
     } else {
-      resolverPropMap[defaultResolver][key] = value;
+      resolverPropMap[defaultResolver].push({
+        key,
+        path: value.path,
+        value: value.value,
+        config: value,
+      });
     }
   });
 
-  return resolvePropMap(ymirPath, resolverPropMap, resolverMap);
+  return resolvePropMap(ymirPath, resolverPropMap, resolverConfig);
 }
