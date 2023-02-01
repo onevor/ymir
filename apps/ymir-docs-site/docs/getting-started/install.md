@@ -56,19 +56,14 @@ If you do not... It is probably my bad. This is a pre-pre-alpha, I'm working on 
 
 ## Setup CLI
 
-You are almost ready to use ymir now, there is only one last thing we need to do to try it out.
 To use the cli you need to install at least one [resolver](../concepts/resolver.md)
 For now you need to do a little manual work to get a resolver up and running.
 
-:::danger Resolver api
-
-The resolver API has not been defined yet; that is the next big thing on my **TODO** list.
-For now, I have a very basic test resolver for **AWS SSM**
-
-:::
-
 Like with the core cli you can install it globally or in your node project. I would recommend you install this one in your project.
 If you are working with in a node project.
+
+List of official ymir resolvers can be found [here](../concepts/resolver.md)
+for this example we will use the AWS SSM resolver.
 
 ```bash
 npm i -D @onevor/ymir-plugin-ssm
@@ -90,7 +85,7 @@ Now get ready for the manual work; we need to tell ymir about this plugin.
 
 First, you need to find the location of the installed plugin.
 
-If there is no `package.json` file in a folder above the one you installed the plugin, you can do this:
+You can try this:
 
 ```bash
 echo $(npm root)/@onevor/ymir-plugin-ssm
@@ -114,7 +109,3 @@ ymir install -p [the path you found above] -r ssm
 Here we are telling ymir where the installed plugin exists on the file system, and we are giving it an alias.
 The alias can be whatever you want, it is a shorthand for the full resolver name `@onevor/ymir-plugin-ssm` it is used in your [stack files](../concepts/stack-file.md)
 and your [stack config files](../concepts/stack-config-file.md) to tell ymir what plugin to load. Ymir looks up your [plugin files](../concepts/plugin-file.md) based on the alias.
-
-## Done
-
-You are now set, ymir should be up and running in your project;
