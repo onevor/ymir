@@ -57,8 +57,16 @@ export async function resolveOne(
   props: BaseProperties,
   ctx: any
 ): Promise<string> {
-  const secret = await _resolveOne(props, ctx);
-  return secret.value;
+  try {
+    const secret = await _resolveOne(props, ctx);
+    return secret.value;
+  } catch (error) {
+    console.error(
+      `Unable to resolve: ${props.key} from path: ${props.path}`,
+      error
+    );
+    return null;
+  }
 }
 
 export async function resolveAll(
