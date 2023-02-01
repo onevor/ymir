@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "description": "Resolver plugin for azure key vault",
   "main": "./src/index.js",
+  "homepage": "https://onevor.no/",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -26,7 +27,6 @@
   "bugs": {
     "url": "https://github.com/onevor/ymir/issues"
   },
-  "homepage": "https://github.com/onevor/ymir#readme",
   "dependencies": {
     "@azure/identity": "^3.1.3",
     "@azure/keyvault-secrets": "^4.6.0"

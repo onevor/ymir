@@ -4,6 +4,7 @@
   "license": "ISC",
   "scripts": {},
   "private": false,
+  "homepage": "https://onevor.no/",
   "devDependencies": {
     "@docusaurus/module-type-aliases": "2.1.0",
     "@nrwl/cli": "^15.5.3",

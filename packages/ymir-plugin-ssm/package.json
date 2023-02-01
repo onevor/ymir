@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "description": "Ymir resolver for AWS SSM",
   "main": "./src/index.js",
+  "homepage": "https://onevor.no/",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,7 +25,6 @@
   "bugs": {
     "url": "https://github.com/onevor/ymir/issues"
   },
-  "homepage": "https://github.com/onevor/ymir#readme",
   "dependencies": {
     "aws-sdk": "^2.1212.0"
   }
