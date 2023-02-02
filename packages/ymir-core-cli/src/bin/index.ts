@@ -12,7 +12,7 @@ import {
   deleteStack,
 } from './stack-operation';
 import { install } from './plugin-operation';
-import { exportStack } from './resolve';
+import { exportStack, importStack } from './resolve';
 
 import * as help from './lib/help';
 
@@ -43,6 +43,7 @@ const commands = {
   delete: (args: any, ctx: any) => deleteStack(args, ctx),
   install: (args: any, ctx: any) => install(args, ctx),
   export: (args: any, ctx: any) => exportStack(args, ctx),
+  import: (args: any, ctx: any) => importStack(args, ctx),
 };
 
 async function main() {
