@@ -2,11 +2,14 @@ import * as nodePath from 'path';
 
 import * as commandLineArgs from 'command-line-args';
 
+import { StackSource, StackParsed } from '../../lib/types/stack';
+
 import * as helper from '../../lib/config/helper';
 import * as fs from '../../lib/config/helper/fs';
 import * as trans from '../../lib/config/parser/transpiler';
 import * as check from '../../lib/resolve/check-install';
 import * as resolverLib from '../../lib/resolve/lib/resolver-operations/resolve-stack';
+import * as getPlugin from '../../lib/plugin/get-plugin';
 
 import { isInProject } from '../lib/index';
 import * as help from '../lib/help';
@@ -38,7 +41,10 @@ function getRelativePaths(stackName: string) {
   };
 }
 
-async function getStackAndConfig(ymirPath: string, stackName: string) {
+async function getStackAndConfig(
+  ymirPath: string,
+  stackName: string
+): Promise<StackSource> {
   const relPaths = getRelativePaths(stackName);
   const [stack, defaultStack] = await getStackAndDefault(
     ymirPath,
@@ -50,23 +56,7 @@ async function getStackAndConfig(ymirPath: string, stackName: string) {
     relPaths.config,
     relPaths.defaultConfig
   );
-  return [stack, defaultStack, stackConfig, defaultStackConfig];
-}
-
-function getDefaultResolver(stackConfig: string, defaultStackConfig: string) {
-  const defaultResolver =
-    check.getDefaultResolverAliasFromConfig(stackConfig) ||
-    check.getDefaultResolverAliasFromConfig(defaultStackConfig);
-
-  if (!defaultResolver) {
-    return [
-      {
-        message: 'No default resolver found in config files',
-      },
-      null,
-    ];
-  }
-  return [null, defaultResolver];
+  return { stack, defaultStack, stackConfig, defaultStackConfig };
 }
 
 export async function getAndValidateResolverAliasPluginPathMap(
@@ -214,11 +204,9 @@ export function mergeResolverConfAndMaps(
  */
 export async function getResolverConfig(
   ymirPath: string,
-  stack: string,
-  defaultStack: string,
-  stackConfig: string,
-  defaultStackConfig: string
+  stackSource: StackSource
 ) {
+  const { stack, defaultStack, stackConfig, defaultStackConfig } = stackSource;
   /**
    * Create a mapping between the resolver alias and the path to the ymir plugin file;
    * eg: { 'aws': '/Users/.../ymir/plugins/aws' }
@@ -255,17 +243,12 @@ export async function getResolverConfig(
   return [null, resolversCof];
 }
 
-export function parseFiles(
-  stack: string,
-  defaultStack: string,
-  stackConfig: string,
-  defaultConfig: string
-) {
+export function parseFiles(stackSource: StackSource): StackParsed {
   return {
-    stack: trans.parseStackFile(stack)[0],
-    defaultStack: trans.parseStackFile(defaultStack)[0],
-    stackConfig: trans.parseStackFile(stackConfig)[0],
-    defaultConfig: trans.parseStackFile(defaultConfig)[0],
+    stack: trans.parseStackFile(stackSource.stack)[0],
+    defaultStack: trans.parseStackFile(stackSource.defaultStack)[0],
+    stackConfig: trans.parseStackFile(stackSource.stackConfig)[0],
+    defaultStackConfig: trans.parseStackFile(stackSource.defaultStackConfig)[0],
   };
 }
 
@@ -289,24 +272,19 @@ export async function exportStack(args: any, ctx: any) {
     return;
   }
 
-  const [stack, defaultStack, stackConfig, defaultStackConfig] =
-    await getStackAndConfig(ymirPath, stackName);
-  const [defaultResolverErr, defaultResolver] = getDefaultResolver(
-    stackConfig,
-    defaultStackConfig
-  );
+  // const [stack, defaultStack, stackConfig, defaultStackConfig] =
+  const stackSource = await getStackAndConfig(ymirPath, stackName);
+  const [defaultResolverErr, defaultResolver] =
+    getPlugin.defaultResolver(stackSource);
 
   if (defaultResolverErr) {
-    console.error(defaultResolverErr.message);
+    console.error(defaultResolverErr.message, defaultResolverErr);
     return;
   }
 
   const [resolverConfErr, resolverConf] = await getResolverConfig(
     ymirPath,
-    stack,
-    defaultStack,
-    stackConfig,
-    defaultStackConfig
+    stackSource
   );
 
   if (resolverConfErr) {
@@ -314,7 +292,7 @@ export async function exportStack(args: any, ctx: any) {
     return;
   }
 
-  const data = parseFiles(stack, defaultStack, stackConfig, defaultStackConfig);
+  const data = parseFiles(stackSource);
 
   const resolved = await resolverLib.resolveStack(
     ymirPath,
@@ -324,7 +302,7 @@ export async function exportStack(args: any, ctx: any) {
   );
 
   const dotFileData = entriesToEnvFile(resolved);
-  const fileConf = data.stackConfig.FILE || data.defaultConfig.FILE;
+  const fileConf = data.stackConfig.FILE || data.defaultStackConfig.FILE;
 
   if (!fileConf) {
     console.error('No FILE config found in stack or default stack');
