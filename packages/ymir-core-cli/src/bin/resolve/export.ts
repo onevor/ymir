@@ -10,54 +10,12 @@ import * as trans from '../../lib/config/parser/transpiler';
 import * as check from '../../lib/resolve/check-install';
 import * as resolverLib from '../../lib/resolve/lib/resolver-operations/resolve-stack';
 import * as getPlugin from '../../lib/plugin/get-plugin';
+import * as getStack from '../../lib/stack/get';
 
 import { isInProject } from '../lib/index';
 import * as help from '../lib/help';
 
 import { entriesToEnvFile } from '../../lib/dotfile';
-
-async function getStackAndDefault(
-  ymirPath: string,
-  relStackPath: string,
-  relDefaultPath: string
-) {
-  // TODO: I can return the promise here to speed things up.
-  const stackProm = await fs.getFileFromYmir(ymirPath, relStackPath);
-  const defaultProm = await fs.getFileFromYmir(ymirPath, relDefaultPath);
-  return [stackProm, defaultProm];
-}
-
-// TODO: this should standardized and dried up.
-function getRelativePaths(stackName: string) {
-  const stackDir = 'stacks';
-  const stackConfigDir = 'stack-config';
-  const defaultFileName = 'default';
-
-  return {
-    stack: nodePath.join(stackDir, stackName),
-    defaultStack: nodePath.join(stackDir, defaultFileName),
-    config: nodePath.join(stackConfigDir, stackName),
-    defaultConfig: nodePath.join(stackConfigDir, defaultFileName),
-  };
-}
-
-async function getStackAndConfig(
-  ymirPath: string,
-  stackName: string
-): Promise<StackSource> {
-  const relPaths = getRelativePaths(stackName);
-  const [stack, defaultStack] = await getStackAndDefault(
-    ymirPath,
-    relPaths.stack,
-    relPaths.defaultStack
-  );
-  const [stackConfig, defaultStackConfig] = await getStackAndDefault(
-    ymirPath,
-    relPaths.config,
-    relPaths.defaultConfig
-  );
-  return { stack, defaultStack, stackConfig, defaultStackConfig };
-}
 
 export async function getAndValidateResolverAliasPluginPathMap(
   ymirPath: string,
@@ -273,7 +231,7 @@ export async function exportStack(args: any, ctx: any) {
   }
 
   // const [stack, defaultStack, stackConfig, defaultStackConfig] =
-  const stackSource = await getStackAndConfig(ymirPath, stackName);
+  const stackSource = await getStack.stackSource(ymirPath, stackName);
   const [defaultResolverErr, defaultResolver] =
     getPlugin.defaultResolver(stackSource);
 
