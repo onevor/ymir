@@ -1,3 +1,5 @@
+import { StackParsed } from '../../../types/stack';
+
 export async function resolvePropMap(
   ymirPath: string,
   propMap: any,
@@ -15,7 +17,7 @@ export async function resolvePropMap(
 
 export async function resolveStack(
   ymirPath: string,
-  data: any,
+  data: StackParsed,
   defaultResolver: string,
   resolverConfig: any
 ) {
