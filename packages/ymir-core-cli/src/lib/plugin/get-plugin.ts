@@ -1,14 +1,21 @@
 /**
  * Helper methods to get plugin | resolver data from stack files
  */
+import * as nodePath from 'path';
 
 import * as check from '../resolve/check-install';
-import { StackSource } from '../types/stack';
+import * as fs from '../config/helper/fs';
+import { StackSource, YmirPath } from '../types/stack';
+import * as trans from '../config/parser/transpiler';
 
 type ErrorResponse = {
   code: string;
   message: string;
+  orgError?: Error;
 };
+
+export const pluginFilePathByAlias = (ymirPath: YmirPath, alias: string) =>
+  nodePath.join(ymirPath, 'plugins', alias);
 
 export function defaultResolver(
   stacksSource: StackSource
@@ -28,6 +35,37 @@ export function defaultResolver(
     ];
   }
   return [null, defaultResolver];
+}
+
+export async function pluginFileByAlias(
+  ymirPath: YmirPath,
+  alias: string
+): Promise<[ErrorResponse | null, string | null]> {
+  const pluginPath = pluginFilePathByAlias(ymirPath, alias);
+  try {
+    const pluginFile = await fs.readFile(pluginPath, 'utf8');
+    return [null, pluginFile];
+  } catch (error) {
+    console.error('Unable to get plugin file', error);
+    return [
+      {
+        code: 'UNABLE_TO_GET_PLUGIN_FILE',
+        message: 'Unable to get plugin file',
+        orgError: error,
+      },
+      null,
+    ];
+  }
+}
+
+export async function pluginByAlias(
+  ymirPath: YmirPath,
+  alias: string
+): Promise<[ErrorResponse | null, any]> {
+  const [pluginFileErr, pluginFile] = await pluginFileByAlias(ymirPath, alias);
+  if (pluginFileErr) return [pluginFileErr, null];
+  const [parsed] = trans.parseStackFile(pluginFile);
+  return [null, parsed];
 }
 
 // TODO: get default resolver
