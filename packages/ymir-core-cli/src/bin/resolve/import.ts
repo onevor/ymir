@@ -7,6 +7,7 @@ import { StackSource } from '../../lib/types/stack';
 
 import * as helper from '../../lib/config/helper';
 import * as getPlugin from '../../lib/plugin/get-plugin';
+import * as validatePlugin from '../../lib/plugin/validate';
 import * as getStack from '../../lib/stack/get';
 import * as fs from '../../lib/config/helper/fs';
 import { isInProject, validateRequiredProps } from '../lib/index';
@@ -86,7 +87,15 @@ export async function importStack(args: any, ctx: any) {
     return;
   }
 
-  // TODO: validate resolver
+  const [pluginValErr, pluginVal] = await validatePlugin.byAlias(
+    ymirPath,
+    resolverAlias
+  );
+
+  if (pluginValErr) {
+    console.error('Unable to validate plugin', pluginValErr);
+    return;
+  }
 
   const [envDataErr, envData] = await getEnvData(opt, ctx);
   if (envDataErr) {
