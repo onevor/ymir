@@ -1,6 +1,8 @@
 import { SecretClient, KeyVaultSecret } from '@azure/keyvault-secrets';
 import { DefaultAzureCredential } from '@azure/identity';
 
+import { randomUUID } from 'crypto';
+
 type BaseProperties = {
   path: string;
   key?: string;
@@ -87,6 +89,14 @@ export async function resolveAll(
   return Promise.all(resolved);
 }
 
+function _createPathFromKeyAndStackName(key: string, stackName?: string) {
+  const name = key.toLowerCase().trim().split('_').join('-');
+  const path = `${stackName || 'default'}-${
+    randomUUID().split('-')[0]
+  }-${name}`;
+  return path;
+}
+
 export async function importEnv(
   payload: any,
   ctx: any
@@ -95,9 +105,7 @@ export async function importEnv(
   const entries = Object.entries(data) as [string, string][];
   const properties: Properties[] = entries.map(([key, value]) => {
     // TODO: make a better parser, this is a bit naive.
-    const name = key.toLowerCase().trim().split('_').join('-');
-    const stackName = payload.stackName || 'default';
-    const path = `${stackName}-${name}`;
+    const path = _createPathFromKeyAndStackName(key, payload.stackName);
     const props: Properties = {
       key,
       value,
