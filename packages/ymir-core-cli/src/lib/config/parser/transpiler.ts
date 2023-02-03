@@ -75,3 +75,19 @@ export function transpileObjectToStack(
   });
   return `${stackDocList.join('').trim()}\n`;
 }
+
+// TODO: should pull out the types form the plugins and have them in a plugin helper lib
+export function transpilePropertiesToStackObject(properties: any, ctx: any) {
+  const stackData = {};
+  const resolver = ctx.resolver || null;
+  properties.forEach((prop) => {
+    const { key, path } = prop;
+    stackData[key] = {
+      path,
+    };
+    if (resolver) {
+      stackData[key]['resolver?'] = resolver;
+    }
+  });
+  return stackData;
+}
