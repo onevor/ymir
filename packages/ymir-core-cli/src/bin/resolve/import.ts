@@ -69,12 +69,37 @@ export async function importStack(args: any, ctx: any) {
   await isInProject(true, ctx);
 
   const def = [
-    { name: 'path', alias: 'p', type: String },
-    { name: 'stack', alias: 's', type: String },
-    { name: 'resolver', alias: 'r', type: String },
+    {
+      name: 'path',
+      alias: 'p',
+      type: String,
+      description: 'Path to .env file',
+    },
+    {
+      name: 'stack',
+      alias: 's',
+      type: String,
+      description:
+        'The name of the stack you want to add to,\n\t\tuses the current stack by default',
+    },
+    {
+      name: 'resolver',
+      alias: 'r',
+      type: String,
+      description:
+        'The alias for the resolver to use, uses the default resolver by default',
+    },
     help.def,
   ];
   const opt = commandLineArgs(def, { argv: args });
+
+  if (opt.help) {
+    return help.log(
+      def,
+      'Import an existing .env file',
+      help.getUsageText('import')
+    );
+  }
 
   const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
 
@@ -82,8 +107,6 @@ export async function importStack(args: any, ctx: any) {
     console.error(valMessage);
     return;
   }
-
-  // TODO: add help
 
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
   const stackSource = await getStack.stackSource(ymirPath, opt.stack);
