@@ -112,9 +112,10 @@ export async function currentStack(
       nodePath.join(ymirPath, 'current_stack'),
       'utf8'
     );
-    // TODO: make a dedicated parser for this, this is not efficient
-    const [parsed] = trans.parseStackFile(currentData);
-    return [null, Object.keys(parsed)[0]];
+    // TODO: Parse this better;
+    const [stackNameRaw] = currentData.split(':');
+    const stackName = stackNameRaw.trim().substring(1, stackNameRaw.length - 1);
+    return [null, stackName];
   } catch (error) {
     return [
       {
