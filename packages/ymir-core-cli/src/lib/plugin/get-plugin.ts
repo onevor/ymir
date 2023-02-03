@@ -250,6 +250,70 @@ export async function configByStackSource(
   return [null, resolversCof];
 }
 
+export async function configByAlias(
+  ymirPath: YmirPath,
+  stackSource: StackSource,
+  alias: string
+) {
+  const path = nodePath.join(ymirPath, 'plugins', alias);
+  const exists = await fs.exists(path);
+  if (!exists) {
+    return [
+      {
+        code: 'PLUGIN_CONFIG_NOT_FOUND',
+        message: 'Unable to find plugin config',
+        alias,
+        path,
+      },
+      null,
+    ];
+  }
+
+  const pluginFile = await fs.readFile(path, 'utf8');
+  const [parsed] = trans.parseStackFile(pluginFile);
+  const pluginPath = parsed.LOCATION ? parsed.LOCATION.path : null;
+  if (!pluginPath) {
+    return [
+      {
+        code: 'INVALID_PLUGIN_CONFIG',
+        message: 'Invalid plugin config, missing install path',
+        alias,
+        path,
+      },
+      null,
+    ];
+  }
+
+  const existsPluginInstall = await fs.exists(pluginPath);
+  if (!existsPluginInstall) {
+    return [
+      {
+        code: 'INVALID_PLUGIN_INSTALLATION',
+        message: 'Invalid plugin installation',
+        alias,
+        path,
+      },
+      null,
+    ];
+  }
+
+  const { stackConfig, defaultStackConfig } = stackSource;
+  const resolverConfig = getResolverConfigsFromConfigFile(stackConfig);
+  const resolverDefaultConfig =
+    getResolverConfigsFromConfigFile(defaultStackConfig);
+
+  return [
+    null,
+    {
+      [alias]: {
+        file: path,
+        installed: pluginPath,
+        config: resolverConfig[alias] || resolverDefaultConfig[alias],
+      },
+    },
+  ];
+}
+
 export function parseFiles(stackSource: StackSource): StackParsed {
   return {
     stack: trans.parseStackFile(stackSource.stack)[0],
