@@ -86,3 +86,38 @@ export async function resolveAll(
 
   return Promise.all(resolved);
 }
+
+export async function importEnv(
+  payload: any,
+  ctx: any
+): Promise<[any, Properties[] | null]> {
+  const { data } = payload;
+  const entries = Object.entries(data) as [string, string][];
+  const properties: Properties[] = entries.map(([key, value]) => {
+    // TODO: make a better parser, this is a bit naive.
+    const name = key.toLowerCase().trim().split('_').join('-');
+    const stackName = payload.stackName || 'default';
+    const path = `${stackName}-${name}`;
+    const props: Properties = {
+      key,
+      value,
+      path,
+    };
+    return props;
+  });
+
+  try {
+    await Promise.all(properties.map((props) => add(props, ctx)));
+  } catch (error) {
+    return [
+      {
+        code: 'UNABLE_TO_IMPORT_ENV',
+        message: 'Unable to import env',
+        orgError: error,
+      },
+      properties,
+    ];
+  }
+
+  return [null, properties];
+}
