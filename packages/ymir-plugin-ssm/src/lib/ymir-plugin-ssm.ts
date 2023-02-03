@@ -3,6 +3,7 @@
  */
 
 import { SSM } from './ssm';
+import { randomUUID } from 'crypto';
 
 type BaseProperties = {
   path: string;
@@ -70,11 +71,54 @@ export async function resolveAll(
 }
 
 export async function add(props: BaseProperties, ctx: any): Promise<void> {
-  throw new Error('Not implemented');
+  const { path, value } = props;
+  const ssm = _getClient(ctx);
+  await ssm.create(path, value);
+  return;
 }
 export async function update(props: BaseProperties, ctx: any): Promise<void> {
   throw new Error('Not implemented');
 }
 export async function remove(props: BaseProperties, ctx: any): Promise<void> {
   throw new Error('Not implemented');
+}
+
+function _createPathFromKeyAndStackName(key: string, stackName?: string) {
+  const name = key.toLowerCase().trim().split('_').join('/');
+  const path = `/${stackName || 'default'}/${
+    randomUUID().split('-')[0]
+  }/${name}`;
+  return path;
+}
+
+export async function importEnv(
+  payload: any,
+  ctx: any
+): Promise<[any, Properties[] | null]> {
+  const { data } = payload;
+  const entries = Object.entries(data) as [string, string][];
+  const properties: Properties[] = entries.map(([key, value]) => {
+    const path = _createPathFromKeyAndStackName(key, payload.stackName);
+    const props: Properties = {
+      key,
+      value,
+      path,
+    };
+    return props;
+  });
+
+  try {
+    await Promise.all(properties.map((props) => add(props, ctx)));
+  } catch (error) {
+    return [
+      {
+        code: 'UNABLE_TO_IMPORT_ENV',
+        message: 'Unable to import env',
+        orgError: error,
+      },
+      properties,
+    ];
+  }
+
+  return [null, properties];
 }
