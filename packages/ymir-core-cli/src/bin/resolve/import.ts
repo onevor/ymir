@@ -64,6 +64,33 @@ export async function getStackToUse(ymirPath: YmirPath, opt: any) {
   return [currentStackError, currentStack];
 }
 
+export async function getResolverConf(
+  ymirPath: YmirPath,
+  stackSource: StackSource,
+  resolverAlias: string
+) {
+  const [resolverConfErr, resolverConf] = await getPlugin.configByStackSource(
+    ymirPath,
+    stackSource
+  );
+
+  if (resolverConfErr) return [resolverConfErr, null];
+
+  if (!Object.hasOwnProperty.call(resolverConf, resolverAlias)) {
+    const [resolverConfAErr, resolverConfA] = await getPlugin.configByAlias(
+      ymirPath,
+      stackSource,
+      resolverAlias
+    );
+
+    if (resolverConfAErr) return [resolverConfAErr, null];
+
+    resolverConf[resolverAlias] = resolverConfA[resolverAlias];
+  }
+
+  return [null, resolverConf];
+}
+
 export async function importStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
@@ -140,9 +167,10 @@ export async function importStack(args: any, ctx: any) {
     return;
   }
 
-  const [resolverConfErr, resolverConf] = await getPlugin.configByStackSource(
+  const [resolverConfErr, resolverConf] = await getResolverConf(
     ymirPath,
-    stackSource
+    stackSource,
+    resolverAlias
   );
 
   if (resolverConfErr) {
