@@ -109,7 +109,6 @@ export async function importStack(args: any, ctx: any) {
   }
 
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
-  const stackSource = await getStack.stackSource(ymirPath, opt.stack);
   const [targetStackErr, targetStack] = await getStackToUse(ymirPath, opt);
 
   if (targetStackErr) {
@@ -117,6 +116,7 @@ export async function importStack(args: any, ctx: any) {
     return;
   }
 
+  const stackSource = await getStack.stackSource(ymirPath, targetStack);
   const [resolverAliasErr, resolverAlias] = getResolverToUse(opt, stackSource);
 
   if (resolverAliasErr) {
