@@ -1,6 +1,6 @@
 {
   "name": "@onevor/ymir-plugin-azure-key-vault",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Resolver plugin for azure key vault",
   "main": "./src/index.js",
   "homepage": "https://onevor.no/",
