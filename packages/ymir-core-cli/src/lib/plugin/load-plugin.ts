@@ -40,5 +40,18 @@ export async function importEnvData(
   const payload = {
     data,
   };
+
+  const pluginHasImport = Object.hasOwnProperty.call(resolver, 'importEnv');
+  if (!pluginHasImport) {
+    return [
+      {
+        code: 'INVALID_PLUGIN',
+        message: 'Plugin does not support import',
+        alias: resolverAlias,
+        stackName,
+      },
+      null,
+    ];
+  }
   return resolver.importEnv(payload, config);
 }
