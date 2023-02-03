@@ -59,7 +59,7 @@ export function log(
     }
 
     if (opt.description) {
-      flag = `${flag}  ("${chalk.blue(opt.description)}")`;
+      flag = `${flag}\n\t\t"${chalk.blue(opt.description)}"`;
     }
 
     flags.push(flag);
