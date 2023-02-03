@@ -8,6 +8,41 @@ import * as nodePath from 'path';
 
 import * as StackT from '../types/stack';
 import * as fs from '../config/helper/fs';
+import * as trans from '../config/parser/transpiler';
+
+export async function stackFile(
+  ymirPath: StackT.YmirPath,
+  stackName: StackT.StackName
+) {
+  const path = nodePath.join(ymirPath, 'stacks', stackName);
+  return fs.readFile(path, 'utf-8');
+}
+
+export async function stackConfigFile(
+  ymirPath: StackT.YmirPath,
+  stackName: StackT.StackName
+) {
+  const path = nodePath.join(ymirPath, 'stack-config', stackName);
+  return fs.readFile(path, 'utf-8');
+}
+
+export async function parsedStack(
+  ymirPath: StackT.YmirPath,
+  stackName: StackT.StackName,
+  storeComments = false
+) {
+  const stackData = await stackFile(ymirPath, stackName);
+  return trans.parseStackFile(stackData, storeComments);
+}
+
+export async function parsedConfig(
+  ymirPath: StackT.YmirPath,
+  stackName: StackT.StackName,
+  storeComments = false
+) {
+  const stackData = await stackConfigFile(ymirPath, stackName);
+  return trans.parseStackFile(stackData, storeComments);
+}
 
 export async function getMainAndDefault(
   ymirPath: StackT.YmirPath,
@@ -67,4 +102,27 @@ export async function stackSource(
   if (configErr) throw configErr;
 
   return { stack, defaultStack, stackConfig, defaultStackConfig };
+}
+
+export async function currentStack(
+  ymirPath: StackT.YmirPath
+): Promise<[any, string | null]> {
+  try {
+    const currentData = await fs.readFile(
+      nodePath.join(ymirPath, 'current_stack'),
+      'utf8'
+    );
+    // TODO: make a dedicated parser for this, this is not efficient
+    const [parsed] = trans.parseStackFile(currentData);
+    return [null, Object.keys(parsed)[0]];
+  } catch (error) {
+    return [
+      {
+        code: 'ERROR_GETTING_CURRENT_STACK',
+        message: 'Unable to get current stack',
+        orgError: error,
+      },
+      null,
+    ];
+  }
 }
