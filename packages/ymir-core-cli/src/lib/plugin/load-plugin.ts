@@ -39,6 +39,7 @@ export async function importEnvData(
   const resolver = await import(resolverConfig[resolverAlias].installed);
   const payload = {
     data,
+    stackName,
   };
 
   const pluginHasImport = Object.hasOwnProperty.call(resolver, 'importEnv');
