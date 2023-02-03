@@ -3,12 +3,15 @@ import * as nodePath from 'path';
 import * as commandLineArgs from 'command-line-args';
 import * as dotenv from 'dotenv';
 
-import { StackSource } from '../../lib/types/stack';
+import { StackSource, YmirPath } from '../../lib/types/stack';
 
 import * as helper from '../../lib/config/helper';
+import * as trans from '../../lib/config/parser/transpiler';
 import * as getPlugin from '../../lib/plugin/get-plugin';
-import * as validatePlugin from '../../lib/plugin/validate';
+import * as loadPlugin from '../../lib/plugin/load-plugin';
 import * as getStack from '../../lib/stack/get';
+import * as updateStack from '../../lib/stack/update';
+import * as validatePlugin from '../../lib/plugin/validate';
 import * as fs from '../../lib/config/helper/fs';
 import { isInProject, validateRequiredProps } from '../lib/index';
 import * as help from '../lib/help';
@@ -52,6 +55,15 @@ export function getResolverToUse(opt: any, stackSource: StackSource) {
   return [null, defaultResolver];
 }
 
+export async function getStackToUse(ymirPath: YmirPath, opt: any) {
+  if (opt.stack) return [null, opt.stack];
+  const [currentStackError, currentStack] = await getStack.currentStack(
+    ymirPath
+  );
+
+  return [currentStackError, currentStack];
+}
+
 export async function importStack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
@@ -64,11 +76,7 @@ export async function importStack(args: any, ctx: any) {
   ];
   const opt = commandLineArgs(def, { argv: args });
 
-  const [isValid, valMessage] = validateRequiredProps(
-    opt,
-    ['path', 'stack'],
-    ctx
-  );
+  const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
 
   if (!isValid) {
     console.error(valMessage);
@@ -79,6 +87,12 @@ export async function importStack(args: any, ctx: any) {
 
   const ymirPath = await helper.ymirProjectFolderPath(cwd);
   const stackSource = await getStack.stackSource(ymirPath, opt.stack);
+  const [targetStackErr, targetStack] = await getStackToUse(ymirPath, opt);
+
+  if (targetStackErr) {
+    console.error('Unable to get stack', targetStackErr);
+    return;
+  }
 
   const [resolverAliasErr, resolverAlias] = getResolverToUse(opt, stackSource);
 
@@ -103,6 +117,42 @@ export async function importStack(args: any, ctx: any) {
     return;
   }
 
-  console.log('envData', envData);
+  const [resolverConfErr, resolverConf] = await getPlugin.configByStackSource(
+    ymirPath,
+    stackSource
+  );
+
+  if (resolverConfErr) {
+    console.error('Unable to get resolver config', resolverConfErr);
+    return;
+  }
+
+  const [resolverLoadErr, resolverLoad] = await loadPlugin.importEnvData(
+    envData,
+    resolverConf,
+    resolverAlias,
+    targetStack
+  );
+
+  if (resolverLoadErr) {
+    console.error('Unable to load resolver', resolverLoadErr);
+    return;
+  }
+
+  const stackData = trans.transpilePropertiesToStackObject(resolverLoad, {
+    resolver: resolverAlias,
+  });
+
+  const [updateErr, update] = await updateStack.getAndMerge(
+    ymirPath,
+    'dev',
+    stackData
+  );
+
+  if (updateErr) {
+    console.error('Unable to update stack', updateErr);
+    return;
+  }
+  console.log('Imported stack successfully: \n', update);
   return;
 }
