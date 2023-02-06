@@ -56,7 +56,7 @@ export class SSM {
       Name: name,
       Value: value,
       Description: description || '',
-      Type: type || 'String',
+      Type: type || 'SecureString',
       Overwrite: overwrite,
     };
 
