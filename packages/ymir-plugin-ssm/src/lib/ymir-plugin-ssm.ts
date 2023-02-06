@@ -16,10 +16,23 @@ type Properties = BaseProperties & { value: string };
 
 let _client: SSM;
 function _getClient(ctx: any): SSM {
+  if (!ctx.config || !ctx.config.region) {
+    throw new Error(`No region provided in config:
+      In your stack config file add:
+      "
+      [RESOLVER_CONFIG_SSM]
+        alias: ssm
+        region: AWS-region-to-use
+      "
+    `);
+  }
+
+  const { region } = ctx.config;
+
   if (_client) {
     return _client;
   }
-  _client = new SSM();
+  _client = new SSM(region);
   return _client;
 }
 

@@ -11,8 +11,8 @@ const sleep = async (ms: number) => {
 export class SSM {
   private sdk: SSMSdk;
 
-  constructor() {
-    this.sdk = new SSMSdk({ region: 'eu-north-1' });
+  constructor(region: string) {
+    this.sdk = new SSMSdk({ region });
   }
 
   async simpleGet(name: string, decryption = false) {
