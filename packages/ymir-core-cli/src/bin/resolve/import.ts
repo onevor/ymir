@@ -196,7 +196,7 @@ export async function importStack(args: any, ctx: any) {
 
   const [updateErr, update] = await updateStack.getAndMerge(
     ymirPath,
-    'dev',
+    targetStack,
     stackData
   );
 
