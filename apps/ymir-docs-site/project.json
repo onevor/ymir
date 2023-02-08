@@ -4,6 +4,14 @@
   "projectType": "application",
   "sourceRoot": "apps/ymir-docs-site/src",
   "targets": {
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "aws s3 sync ./ s3://onevor.no",
+        "cwd": "dist/apps/ymir-docs-site"
+      },
+      "dependsOn": ["build"]
+    },
     "build": {
       "executor": "@nx-plus/docusaurus:browser",
       "options": {

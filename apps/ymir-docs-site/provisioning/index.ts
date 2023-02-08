@@ -8,6 +8,7 @@ import * as aws from '@pulumi/aws';
  * Pulumi tracks every file, so using pulumi to push a large number of files is really slow.
  * Just use the CLI:
  *    `aws s3 sync ../../../dist/apps/ymir-docs-site s3://$(pulumi stack output bucketName) --acl public-read`
+ *    `aws s3 sync ./dist/apps/ymir-docs-site s3://onevor.no`
  */
 
 const siteBucket = new aws.s3.Bucket('s3-ymir-docs-website-bucket', {
