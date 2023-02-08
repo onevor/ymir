@@ -14,8 +14,11 @@ type ErrorResponse = {
   orgError?: Error;
 };
 
+export const pluginDirectory = (ymirPath: YmirPath) =>
+  nodePath.join(ymirPath, 'plugins');
+
 export const pluginFilePathByAlias = (ymirPath: YmirPath, alias: string) =>
-  nodePath.join(ymirPath, 'plugins', alias);
+  nodePath.join(pluginDirectory(ymirPath), alias);
 
 export function defaultResolver(
   stacksSource: StackSource
@@ -66,6 +69,60 @@ export async function pluginByAlias(
   if (pluginFileErr) return [pluginFileErr, null];
   const [parsed] = trans.parseStackFile(pluginFile);
   return [null, parsed];
+}
+
+export async function allPluginFilePaths(
+  ymirPath: YmirPath
+): Promise<[ErrorResponse | null, string[] | null]> {
+  const pluginDir = pluginDirectory(ymirPath);
+  try {
+    const pluginFiles = await fs.readdir(pluginDir);
+    const pluginFilePaths = pluginFiles.map((file) =>
+      nodePath.join(pluginDir, file)
+    );
+    return [null, pluginFilePaths];
+  } catch (error) {
+    return [
+      {
+        code: 'UNABLE_TO_GET_PLUGIN_FILE_PATHS',
+        message: 'Unable to get plugin file paths',
+        orgError: error,
+      },
+      null,
+    ];
+  }
+}
+
+export async function allPluginFileData(
+  ymirPath: YmirPath
+): Promise<[ErrorResponse | null, string[] | null]> {
+  const [filePathsErr, filePaths] = await allPluginFilePaths(ymirPath);
+  if (filePathsErr) return [filePathsErr, null];
+
+  try {
+    const filePromise = await Promise.all(
+      filePaths.map(async (path) => fs.readFile(path, 'utf8'))
+    );
+    return [null, filePromise];
+  } catch (error) {
+    return [
+      {
+        code: 'UNABLE_TO_GET_PLUGIN_FILE_DATA',
+        message: 'Unable to get plugin file data',
+        orgError: error,
+      },
+      null,
+    ];
+  }
+}
+
+export async function allPluginParsed(
+  ymirPath: YmirPath
+): Promise<[ErrorResponse | null, any | null]> {
+  const [fileDataErr, fileData] = await allPluginFileData(ymirPath);
+  if (fileDataErr) return [fileDataErr, null];
+
+  return [null, fileData.map((data) => trans.parseStackFile(data)[0])];
 }
 
 export async function getAndValidateResolverAliasPluginPathMap(
