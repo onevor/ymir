@@ -14,6 +14,8 @@ import {
 import { install } from './plugin-operation';
 import { exportStack, importStack } from './resolve';
 
+import { version } from './general-operation';
+
 import * as help from './lib/help';
 
 const cwd = process.cwd();
@@ -41,22 +43,28 @@ const commands = {
   remove: (args: any, ctx: any) => remove(args, ctx),
   create: (args: any, ctx: any) => create(args, ctx),
   delete: (args: any, ctx: any) => deleteStack(args, ctx),
+
   install: (args: any, ctx: any) => install(args, ctx),
   export: (args: any, ctx: any) => exportStack(args, ctx),
   import: (args: any, ctx: any) => importStack(args, ctx),
+
+  version: (args: any, ctx: any) => version(args, ctx),
 };
 
 async function main() {
+  const ctx = {
+    cwd,
+    mainOptions,
+  };
+
   if (!mainOptions.command) {
+    const isVersion = argv.includes('--version') || argv.includes('-v');
+    if (isVersion) return commands.version(argv, ctx);
     const isInHelp = argv.includes('--help') || argv.includes('-h');
     const header = isInHelp ? '' : help.missingCommandError;
     return help.logMain(Object.keys(commands), header);
   }
 
-  const ctx = {
-    cwd,
-    mainOptions,
-  };
   if (!Object.hasOwnProperty.call(commands, mainOptions.command)) {
     console.error(`"${mainOptions.command}" is not a valid command`);
   }
