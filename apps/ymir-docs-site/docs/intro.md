@@ -3,7 +3,7 @@ sidebar_position: 1
 slug: /
 ---
 
-# Streamlining Your Development Environment with Ymir: Say Goodbye to Messy .env Files
+# Intro
 
 ![ymir init](./tutorials/img/init.png)
 
