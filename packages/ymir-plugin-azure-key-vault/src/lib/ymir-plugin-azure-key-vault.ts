@@ -1,3 +1,5 @@
+import * as nodePath from 'path';
+
 import { SecretClient, KeyVaultSecret } from '@azure/keyvault-secrets';
 import { DefaultAzureCredential } from '@azure/identity';
 
@@ -128,4 +130,17 @@ export async function importEnv(
   }
 
   return [null, properties];
+}
+
+export async function info() {
+  const pk = await import('../../package.json');
+  const installPath = nodePath.join(__dirname, '../../');
+  const { name, version } = pk;
+  return {
+    name,
+    version,
+    alias: 'keyvault',
+    requiredConfig: ['vault_name'],
+    installPath,
+  };
 }
