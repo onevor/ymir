@@ -1,6 +1,4 @@
-/**
- * This is a mock plugin: I have yet to design the plugin structure.
- */
+import * as nodePath from 'path';
 
 import { SSM } from './ssm';
 import { randomUUID } from 'crypto';
@@ -134,4 +132,17 @@ export async function importEnv(
   }
 
   return [null, properties];
+}
+
+export async function info() {
+  const pk = await import('../../package.json');
+  const installPath = nodePath.join(__dirname, '../../');
+  const { name, version } = pk;
+  return {
+    name,
+    version,
+    alias: 'ssm',
+    requiredConfig: ['region'],
+    installPath,
+  };
 }
