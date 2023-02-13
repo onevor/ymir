@@ -14,6 +14,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
+    "resolveJsonModule": true,
     "paths": {
       "@onevor/ymir-core-cli": ["packages/ymir-core-cli/src/index.ts"],
       "@onevor/ymir-plugin-azure-key-vault": [
