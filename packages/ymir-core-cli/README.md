@@ -1,17 +1,46 @@
-# Ymir monorepo
+# Streamlining Your Development Environment with Ymir: Say Goodbye to Messy .env Files
 
-Ymir is a cli tool for managing application config and secrets. It makes it easy to share config between developers, you can check in the ymir files so that your config an secrets are version controlled with your applications. Ymir does not store config or secrets, it only stores information about your config and secrets, and where to find them.
+See full install tutorial [here](https://onevor.no/tutorials/install)
 
-## Disclaimer
+## Get started
 
-This is a prototype built over a two weeks sprint to solve our internal need for a tool like this. We do plan to continue development on this project. The code here is rough around the edges and not very pretty to look at. We know there are a lot of bugs, and we switched directions halfway through the sprint, so the code is all over the place.
+```bash
+npm i -g @onevor/ymir-core-cli
+```
 
-If you are among the bravest software devs out there, we welcome you to try out ymir and let us know what you think. Ymir should not be used in a production environment.
+You need to install at least one plugin:
 
-## Documentation
+```bash
+npm i -D @onevor/ymir-plugin-ssm`
+```
 
-Full documentation at [onevor.no](https://onevor.no)
+You can then init ymir in your project: `ymir init`
 
-Github [Monorepo](https://github.com/onevor/ymir#readme)
+Let ymir know about your installed plugin:
 
-Ymir core cli [NPM](https://www.npmjs.com/package/@onevor/ymir-core-cli)
+```bash
+ymir install --path "/Users/xxx/project/node_modules/@onevor/ymir-plugin-ssm" --alias ssm
+```
+
+For now you need to supply an absolute path, im working on automating this. So that ymir will find your plugins by it self.
+
+You should now be ready to use ymir. Try to import your existing `.env` file:
+
+```bash
+PORT=5000
+SECRET=top-secret-string
+```
+
+```bash
+ymir import --path .env
+```
+
+You can now delete your env file: `rm .env`
+
+To get it back:
+
+```bash
+ymir export
+```
+
+Read the full docs at [onevor.no](https://onevor.no)
