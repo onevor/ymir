@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Get started
 
-Get started with Ymir. If you are looking for an intro to Ymir check out this article first **LINK TO INTRO** or read the docs her onevor.no.
+Get started with Ymir. If you are looking for an intro to Ymir check out [this article](../intro.md) first or read the docs her onevor.no.
 
 In this tutorial, we will get you up and running with Ymir in an existing project, but the steps are pretty similar for getting started with a new project. We will be working with a node project, but Ymir can work with any project type that uses `.env` files. You do, however, need node and NPM installed.
 
