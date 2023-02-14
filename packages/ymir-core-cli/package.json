@@ -1,6 +1,6 @@
 {
   "name": "@onevor/ymir-core-cli",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Manage app config and secrets",
   "main": "index.js",
   "private": false,
