@@ -76,7 +76,6 @@ You can now delete your env files, if you want to keep the structure with `.env.
 
 ```bash
 ymir checkout stage
-ymir export
 ```
 
 Get your env file(s) back:
@@ -88,7 +87,6 @@ PORT=80
 
 ```
 ymir checkout dev
-ymir export
 ```
 
 ```bash title=".env"
