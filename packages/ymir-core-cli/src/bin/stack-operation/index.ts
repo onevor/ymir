@@ -7,6 +7,7 @@ import * as coLib from '../../lib/config/stack-operations/checkout';
 import { createNewStack } from '../../lib/config/stack-operations/create-stack';
 import { removeStack } from '../../lib/config/stack-operations/remove-stack';
 import * as edit from '../../lib/config/stack-operations/edit-stack-file';
+import * as reg from '../../lib/plugin/register-plugin';
 
 import {
   isInProject,
@@ -42,6 +43,41 @@ export async function init(args: any, ctx: any) {
   await initLib.init(cwd, opt.relativePath, opt.absolutePath);
 
   console.log(`New ymir project created at ${chalk.green(cwd)}`);
+
+  const ymirPath = helper.ymirProjectFolderPath(cwd);
+  const pluginPaths = await reg.fullPluginResolve(cwd);
+
+  if (pluginPaths.length === 0) {
+    console.warn(chalk.red('\nUnable to locate any plugins to install'));
+    return;
+  }
+
+  console.log(
+    `\nFound ${chalk.green(
+      pluginPaths.length
+    )} plugins to install:\n\t${chalk.green(pluginPaths.join('\n\t'))}`
+  );
+
+  const resolved = await reg.registerPlugins(ymirPath, pluginPaths);
+
+  console.log(
+    `\n${chalk.green(
+      resolved.creating.length
+    )} Plugins were installed:\n\t${chalk.green(
+      resolved.creating.join('\n\t')
+    )}`
+  );
+
+  if (resolved.alreadyExists.length !== 0) {
+    console.warn(
+      `\nUse ${chalk.red('[--force|-f]')} to ${chalk.red(
+        'force'
+      )} plugin file update.\n\tThe following plugins were already installed:\n\t\t${chalk.red(
+        resolved.alreadyExists.join('\n\t\t')
+      )}`
+    );
+  }
+  return;
 }
 
 export async function checkoutStack(args: any, ctx: any) {

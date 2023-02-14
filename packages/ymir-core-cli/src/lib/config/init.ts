@@ -192,9 +192,9 @@ export async function setupProjectFolder(
     );
 
     // TODO: need to add template data here;
-    await Promise.all(
-      ymirPluginStructure.map((fn) => fn(nodePath.join(path, 'plugins')))
-    );
+    // await Promise.all(
+    //   ymirPluginStructure.map((fn) => fn(nodePath.join(path, 'plugins')))
+    // );
     await stackFileCreatePromises;
     await stackConfigCreatePromises;
     await fs.writeFile(nodePath.join(path, '.gitignore'), '/plugins\n');
