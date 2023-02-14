@@ -4,8 +4,18 @@ sidebar_position: 2
 
 # Examples
 
-Now you should be ready to try out ymir; in your project, you should now have the folder .ymir; this is where ymir will store your application descriptions.
-Ymir does not store any config or secrets, so you should be safe to commit this folder. It helps to have a basic understanding of this directory before we continue.
+:::danger Do not delete your .env
+
+`ymir checkout <stack-name>` and `ymir export`
+Will overwrite your `.env` file by default.
+**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
+
+I will make sure **Ymir** does not do this in an upcoming update
+
+:::
+
+Now you should be ready to try out **Ymir**; in your project, you should now have the folder `.ymir`; this is where **Ymir** will store your application descriptions.
+**Ymir** does not store any config or secrets related to your application, so you should be safe to commit this folder. It helps to have a basic understanding of this directory before we continue.
 
 **.ymir/** content:
 
@@ -16,7 +26,7 @@ Ymir does not store any config or secrets, so you should be safe to commit this 
 
 ## Stacks
 
-By default **ymir** is set up with three [stacks](../concepts/stack-file.md)
+By default **Ymir** is set up with three [stacks](../concepts/stack-file.md)
 
 - dev
 - stage
@@ -33,13 +43,13 @@ Stacks do **not** contain the **value** of your environment variables. **Only** 
 You can check what stack you currently have checked out with:
 
 ```bash
-ymir stack
+ymir stack --current|-c
 ```
 
 You can also see all stacks in your project with:
 
 ```bash
-ymir stack -l
+ymir stack
 ```
 
 ## Create a new stack
@@ -75,10 +85,21 @@ path: /default/test/secure/port
 :::tip NOTE
 
 I need to work a little on the files here, it looks like you have two properties here. But `DESCRIBE` is not a prop. All other values in `[]` are props.
+I will switch to an existing markdown syntax, like TOML
 
 :::
 
 ## Export
+
+:::danger Do not delete your .env
+
+`ymir checkout <stack-name>` and `ymir export`
+Will overwrite your `.env` file by default.
+**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
+
+I will make sure **Ymir** does not do this in an upcoming update
+
+:::
 
 Now that we have our first stack, we want to use it.
 
