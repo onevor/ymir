@@ -8,6 +8,7 @@ import { createNewStack } from '../../lib/config/stack-operations/create-stack';
 import { removeStack } from '../../lib/config/stack-operations/remove-stack';
 import * as edit from '../../lib/config/stack-operations/edit-stack-file';
 import * as reg from '../../lib/plugin/register-plugin';
+import plugin from '../../lib/plugin';
 
 import {
   isInProject,
@@ -106,9 +107,16 @@ export async function checkoutStack(args: any, ctx: any) {
       type: Boolean,
       description: 'Create a new stack',
     },
+    {
+      name: 'ignoreExport',
+      alias: 'i',
+      type: Boolean,
+      description: 'Do not export the stack on checkout',
+    },
     help.def,
   ];
   const opt = commandLineArgs(def, { argv: subArgs });
+  const ymirPath = await helper.ymirProjectFolderPath(cwd);
 
   if (opt.help) {
     return help.log(
@@ -124,29 +132,36 @@ export async function checkoutStack(args: any, ctx: any) {
     );
   }
 
-  const name = subCommand || opt.name;
+  const stack = subCommand || opt.name;
 
-  if (!name) {
+  if (!stack) {
     console.error(
       `Invalid command: missing stack name to checkout\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]`
     );
     return;
   }
 
-  const exists = await helper.stackExists(cwd, name);
+  const exists = await helper.stackExists(cwd, stack);
 
   if (!exists && !opt.create) {
-    console.error(`Stack ${name} does not exist`);
+    console.error(`Stack ${stack} does not exist`);
     return;
   }
 
   if (!exists && opt.create) {
-    console.log(`Creating stack ${name}`);
-    await createNewStack(cwd, name);
+    console.log(`Creating stack ${stack}`);
+    await createNewStack(cwd, stack);
   }
 
-  console.log(`Checking out stack ${name}`);
-  return coLib.checkoutStack(cwd, name);
+  console.log(`Checking out stack ${stack}`);
+  await coLib.checkoutStack(cwd, stack);
+
+  if (opt.ignoreExport || opt.create) {
+    console.log(`Skipping export of stack ${stack}`);
+    return;
+  }
+
+  return plugin.export(ymirPath, stack);
 }
 
 export async function stack(args: any, ctx: any) {
