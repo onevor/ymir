@@ -9,6 +9,8 @@ import { execCommand } from '../cmd';
 import * as fs from '../config/helper/fs';
 import * as trans from '../config/parser/transpiler';
 
+export type PluginPath = string;
+
 const pluginPrefix = 'ymir-plugin-';
 
 export async function getNodeModulesPath(global = false) {
@@ -105,7 +107,7 @@ export async function crawlAndLocatePlugins(cwd: string) {
   }, Promise.resolve([]));
 }
 
-export async function fullPluginResolve(cwd: string) {
+export async function fullPluginResolve(cwd: string): Promise<PluginPath[]> {
   const projectRoot = await getNodeModulesPath();
   const globalRoot = await getNodeModulesPath(true);
 
@@ -153,7 +155,7 @@ export function createPluginFileData(info: any) {
 
 export async function registerPlugins(
   ymirPath: string,
-  pluginPaths: string[],
+  pluginPaths: PluginPath[],
   overwrite = false
 ) {
   const plugins = await pluginPaths.reduce(
@@ -170,17 +172,28 @@ export async function registerPlugins(
     Promise.resolve({ error: [], result: [], files: [] })
   );
 
+  const alreadyExists = [];
+  const creating = [];
   const { files } = plugins;
   const fileWrites = files.map(async ([path, data]) => {
     if (!overwrite) {
       const exists = await fs.exists(path);
       if (exists) {
-        console.log(`Plugin ${path} already exists, skipping`);
+        alreadyExists.push(path);
         return null;
       }
     }
+    creating.push(path);
     return fs.writeFile(path, data);
   });
 
   await Promise.all(fileWrites);
+
+  const result = {
+    pluginPaths,
+    resolved: plugins,
+    alreadyExists,
+    creating,
+  };
+  return result;
 }
