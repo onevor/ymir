@@ -63,32 +63,32 @@ const ymirRootStructure = [
   (basePath: string, data = '[dev]: ./stacks/dev') => {
     const name = 'current_stack';
     const path = nodePath.join(basePath, name);
-    console.log(`Creating file: ${name} at path: ${path}`);
+    // console.log(`Creating file: ${name} at path: ${path}`);
     return fs.writeFile(path, data);
   },
   (basePath: string) => {
     const name = 'stacks';
     const path = nodePath.join(basePath, name);
-    console.log(`Creating dir: ${name} at path: ${path}`);
+    // console.log(`Creating dir: ${name} at path: ${path}`);
     return fs.mkdir(path);
   },
   (basePath: string) => {
     const name = 'stack-config';
     const path = nodePath.join(basePath, name);
-    console.log(`Creating dir: ${name} at path: ${path}`);
+    // console.log(`Creating dir: ${name} at path: ${path}`);
     return fs.mkdir(path);
   },
   (basePath: string) => {
     const name = 'plugins';
     const path = nodePath.join(basePath, name);
-    console.log(`Creating dir: ${name} at path: ${path}`);
+    // console.log(`Creating dir: ${name} at path: ${path}`);
     return fs.mkdir(path);
   },
 ];
 
 async function createNewFile(basePath: string, name: string, data: string) {
   const path = nodePath.join(basePath, name);
-  console.log(`Creating file: ${name} at path: ${path}`);
+  // console.log(`Creating file: ${name} at path: ${path}`);
   return fs.writeFile(path, data);
 }
 
@@ -110,7 +110,7 @@ const ymirPluginStructure = [
   (basePath: string, data = 'stuff from rc here') => {
     const name = 'ssm';
     const path = nodePath.join(basePath, name);
-    console.log(`Creating file: ${name} at path: ${path}`);
+    // console.log(`Creating file: ${name} at path: ${path}`);
     return fs.writeFile(path, data);
   },
 ];
@@ -197,6 +197,7 @@ export async function setupProjectFolder(
     );
     await stackFileCreatePromises;
     await stackConfigCreatePromises;
+    await fs.writeFile(nodePath.join(path, '.gitignore'), '/plugins\n');
     return;
   } catch (error) {
     // TODO: if it fail, we should clean it up, remove the folder, so that we remove any file created;
@@ -218,9 +219,9 @@ export async function init(
     throw new Error(`Ymir config already exists at ${path}`);
   }
 
-  console.log(`Creating Ymir project dir at ${path}...`);
+  // console.log(`Creating Ymir project dir at ${path}...`);
   await createYmirProjectFolder(cwd, relativePath, absolutePath);
-  console.log(`Setting up Ymir project dir at ${path}...`);
+  // console.log(`Setting up Ymir project dir at ${path}...`);
   await setupProjectFolder(cwd, relativePath, absolutePath);
 
   return;
