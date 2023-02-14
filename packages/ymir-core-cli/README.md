@@ -1,8 +1,16 @@
-# Streamlining Your Development Environment with Ymir: Say Goodbye to Messy .env Files
+# Get started with Ymir
 
-See full install tutorial [here](https://onevor.no/tutorials/install)
+## WARNING: Do not delete your .env
+
+`ymir checkout <stack-name>` and `ymir export`
+Will overwrite your `.env` file by default.
+**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
+
+I will make sure **Ymir** does not do this in an upcoming update
 
 ## Get started
+
+See full install tutorial [here](https://onevor.no/tutorials/install)
 
 ```bash
 npm i -g @onevor/ymir-core-cli
@@ -19,10 +27,10 @@ You can then init ymir in your project: `ymir init`
 Let ymir know about your installed plugin:
 
 ```bash
-ymir install --path "/Users/xxx/project/node_modules/@onevor/ymir-plugin-ssm" --alias ssm
+ymir install
 ```
 
-For now you need to supply an absolute path, im working on automating this. So that ymir will find your plugins by it self.
+This happens automaticity if you init after installing the plugin, but if you install a plugin after init, you need to tell **Ymir** to update the plugin files.
 
 You should now be ready to use ymir. Try to import your existing `.env` file:
 
