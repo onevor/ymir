@@ -48,7 +48,7 @@ export async function init(args: any, ctx: any) {
   const pluginPaths = await reg.fullPluginResolve(cwd);
 
   if (pluginPaths.length === 0) {
-    console.warn(chalk.red('\nUnable to locate any plugins to install'));
+    console.warn(chalk.red('Unable to locate any plugins to install'));
     return;
   }
 

@@ -16,12 +16,27 @@ const pluginPrefix = 'ymir-plugin-';
 export async function getNodeModulesPath(global = false) {
   const baseCmd = 'npm root';
   const cmd = global ? `${baseCmd} -g` : baseCmd;
-  const path = await execCommand(cmd);
-  return path.trim();
+  try {
+    const path = (await execCommand(cmd)).trim();
+    const exists = await fs.exists(path);
+    if (!exists) return '';
+    return path;
+  } catch (error) {
+    console.log('Error getting node modules path', error);
+    return '';
+  }
 }
 
-export async function lsNodeModules(path: string) {
-  return fs.readdir(path);
+export async function lsNodeModules(path: string): Promise<string[]> {
+  try {
+    return fs.readdir(path);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    console.error('Unable to ls node modules', error);
+    throw new error();
+  }
 }
 
 export async function crawlNodeModules(pathPrefix: string, crawl: string[]) {
@@ -39,6 +54,9 @@ export async function crawlNodeModules(pathPrefix: string, crawl: string[]) {
 }
 
 export async function locatePlugins(pathPrefix: string) {
+  if (pathPrefix.length === 0) {
+    return [];
+  }
   const dir = await lsNodeModules(pathPrefix);
   const pluginPaths = [];
   const crawl = [];
