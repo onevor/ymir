@@ -153,7 +153,12 @@ export async function stack(args: any, ctx: any) {
   const { cwd } = ctx;
   await isInProject(true, ctx);
   const def = [
-    { name: 'list', alias: 'l', type: Boolean, description: 'List all stacks' },
+    {
+      name: 'current',
+      alias: 'c',
+      type: Boolean,
+      description: 'Only list the current stack',
+    },
     {
       name: 'path',
       alias: 'p',
@@ -173,14 +178,14 @@ export async function stack(args: any, ctx: any) {
   const ymirPath = helper.ymirProjectFolderPath(cwd);
   const [name, location] = await helper.getCurrentStack(ymirPath);
 
-  const currentStackName = opt.list ? `* ${name}` : name;
+  const currentStackName = chalk.green(opt.current ? name : `* ${name}`);
   const stackRecord = opt.path
     ? `${currentStackName} @(${location})`
     : currentStackName;
 
   stacks.push(stackRecord);
 
-  if (opt.list) {
+  if (!opt.current) {
     const [fileNames, path] = await helper.getAllStackFileNames(ymirPath);
     fileNames.forEach((stackName) => {
       if (stackName !== name) {
@@ -189,11 +194,7 @@ export async function stack(args: any, ctx: any) {
     });
   }
 
-  if (opt.list) {
-    console.log(`Stacks:\n\t${stacks.join('\n\t')}`);
-    return;
-  }
-  console.log(`Current stack:\n\t${stacks.join('\n\t')}`);
+  console.log(`\t${stacks.join('\n\t')}`);
   return;
 }
 
