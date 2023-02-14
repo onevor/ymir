@@ -1,3 +1,4 @@
+import * as Chalk from 'chalk';
 import * as commandLineArgs from 'command-line-args';
 
 import * as initLib from '../../lib/config/init';
@@ -16,6 +17,8 @@ import {
 } from '../lib/index';
 
 import * as help from '../lib/help';
+
+const chalk: any = Chalk;
 
 /**
  * TODO:
@@ -36,7 +39,9 @@ export async function init(args: any, ctx: any) {
     return help.log(def, 'Init a new ymir project');
   }
 
-  return initLib.init(cwd, opt.relativePath, opt.absolutePath);
+  await initLib.init(cwd, opt.relativePath, opt.absolutePath);
+
+  console.log(`New ymir project created at ${chalk.green(cwd)}`);
 }
 
 export async function checkoutStack(args: any, ctx: any) {
