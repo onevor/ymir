@@ -4,6 +4,16 @@ sidebar_position: 1
 
 # Get started
 
+:::danger Do not delete your .env
+
+`ymir checkout <stack-name>` and `ymir export`
+Will overwrite your `.env` file by default.
+**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
+
+I will make sure **Ymir** does not do this in an upcoming update
+
+:::
+
 Get started with Ymir. If you are looking for an intro to Ymir check out [this article](../intro.md) first or read the docs her onevor.no.
 
 In this tutorial, we will get you up and running with Ymir in an existing project, but the steps are pretty similar for getting started with a new project. We will be working with a node project, but Ymir can work with any project type that uses `.env` files. You do, however, need node and NPM installed.

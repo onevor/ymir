@@ -4,6 +4,12 @@
   "projectType": "application",
   "sourceRoot": "apps/ymir-docs-site/src",
   "targets": {
+    "cloudFrontInvalidation": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "aws cloudfront create-invalidation --distribution-id EO8RB3SFLFDTE --paths \"/*\""
+      }
+    },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
