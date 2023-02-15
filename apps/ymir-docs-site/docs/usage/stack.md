@@ -42,16 +42,6 @@ You can use `ymir stack -p` to get the path, then cat the file.
 
 ## Checkout
 
-:::danger Do not delete your .env
-
-`ymir checkout <stack-name>` and `ymir export`
-Will overwrite your `.env` file by default.
-**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
-
-I will make sure **Ymir** does not do this in an upcoming update
-
-:::
-
 Ymir is designed to work best in the context of one stack. You can checkout a **stack** like you can checkout a **branch** in git.
 
 ```bash
@@ -129,16 +119,6 @@ Flags:
   - Print help
 
 ## Export
-
-:::danger Do not delete your .env
-
-`ymir checkout <stack-name>` and `ymir export`
-Will overwrite your `.env` file by default.
-**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
-
-I will make sure **Ymir** does not do this in an upcoming update
-
-:::
 
 To use a stack in your application you need to export a `.env` file. This happens by default when you checkout a stack, but you can do it manually with `export`
 

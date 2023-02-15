@@ -5,16 +5,6 @@ slug: /
 
 # Intro
 
-:::danger Do not delete your .env
-
-`ymir checkout <stack-name>` and `ymir export`
-Will overwrite your `.env` file by default.
-**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
-
-I will make sure **Ymir** does not do this in an upcoming update
-
-:::
-
 ![ymir init](./tutorials/img/init.png)
 
 As developers, we have come a long way in automating our development process. From code generation to continuous integration, we have an abundance of excellent dev tools at our disposal. However, one thing that has yet to be standardized and simplified is the management of environment variables and secrets. We’re all too familiar with the love-hate relationship we have with `.env` files and their siblings `.env.dev`, `.rc`, `x.config.json`, and `hell.yml`. It's time to do something about it.

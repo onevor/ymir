@@ -4,16 +4,6 @@ sidebar_position: 1
 
 # Install
 
-:::danger Do not delete your .env
-
-`ymir checkout <stack-name>` and `ymir export`
-Will overwrite your `.env` file by default.
-**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
-
-I will make sure **Ymir** does not do this in an upcoming update
-
-:::
-
 **Ymir** can be installed with **NPM**, it is recommended to install it globally, but you can install it in your node project as well.
 
 :::tip NOTE
