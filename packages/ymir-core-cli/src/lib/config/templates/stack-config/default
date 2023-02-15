@@ -6,7 +6,7 @@
 
 [FILE]
   path: ./; Relative to the project root;
-  name: .env; The name of the file
+  name: .env.ymir; If you change this to .env, make sure your .env files are tracked by Ymir. Running export or checkout will overwrite your .env file
   description?: This is the default dot env file for all stacks
 
 [DEFAULT_RESOLVER]
