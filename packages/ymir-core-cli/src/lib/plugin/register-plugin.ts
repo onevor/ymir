@@ -14,6 +14,19 @@ export type PluginPath = string;
 
 const pluginPrefix = 'ymir-plugin-';
 
+export async function importPlugin(path: PluginPath) {
+  try {
+    const plugin = await import(path);
+    return plugin;
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      console.warn(`Unable to load package.json: ${path}, skipping`, error);
+      return null;
+    }
+    throw error;
+  }
+}
+
 export async function getNodeModulesPath(global = false) {
   const baseCmd = 'npm root';
   const cmd = global ? `${baseCmd} -g` : baseCmd;
@@ -77,7 +90,8 @@ export async function locatePlugins(pathPrefix: string) {
 }
 
 export async function extractPluginFromPkJson(path: string) {
-  const pk = await import(path);
+  const pk = await importPlugin(path);
+  if (!pk) return [];
   const { devDependencies, dependencies } = pk;
   const deps = Object.keys({ ...devDependencies, ...dependencies });
   // TODO: clean this up;
@@ -143,7 +157,16 @@ export async function fullPluginResolve(cwd: string): Promise<PluginPath[]> {
 
 // TODO: move to plugin get
 export async function getPluginInfo(path: string) {
-  const plugin = await import(path);
+  const plugin = await importPlugin(path);
+  if (!plugin) {
+    return [
+      {
+        code: 'UNABLE_TO_IMPORT_PLUGIN',
+        message: `Unable to import plugin ${path}`,
+      },
+      null,
+    ];
+  }
   const hasInfo = plugin && Object.hasOwnProperty.call(plugin, 'info');
   if (!hasInfo) {
     return [
