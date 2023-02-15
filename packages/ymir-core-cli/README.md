@@ -1,15 +1,5 @@
 # Get started with Ymir
 
-## WARNING: Do not delete your .env
-
-`ymir checkout <stack-name>` and `ymir export`
-Will overwrite your `.env` file by default.
-**Ymir** assume your `.env` file is already managed by **Ymir**, that is not the case if you integrate ymir with an existing project, without running `ymir import -p .env`
-
-I will make sure **Ymir** does not do this in an upcoming update
-
-## Get started
-
 See full install tutorial [here](https://onevor.no/tutorials/install)
 
 ```bash
