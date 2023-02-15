@@ -39,8 +39,8 @@
     "buildFull": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cp -r ./ymir-core-cli/src/lib/config/templates ../dist/ymir-core-cli/src/lib/config/ && cp -r ./ymir-core-cli/README.md ../dist/ymir-core-cli/README.md",
-        "cwd": "packages/"
+        "command": "cp -r ./LICENSE ./dist/ymir-core-cli/LICENSE && cp -r ./packages/ymir-core-cli/src/lib/config/templates ./dist/ymir-core-cli/src/lib/config/ && cp -r ./packages/ymir-core-cli/README.md ./dist/ymir-core-cli/README.md",
+        "cwd": "./"
       },
       "dependsOn": ["build"]
     },
