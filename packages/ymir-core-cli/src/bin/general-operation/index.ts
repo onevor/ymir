@@ -47,13 +47,23 @@ const versionString = (name: string, version: string) => `${name} @${version}`;
 
 export async function version(args: any, ctx: any) {
   const { cwd } = ctx;
-  await isInProject(true, ctx);
+  const isProject = await isInProject(false, ctx);
   const pathToSelfPkJson = nodePath.join(__dirname, '../../../package.json');
   const pk = await import(pathToSelfPkJson);
 
-  const ymirPath = helper.ymirProjectFolderPath(cwd);
-
   const { version: coreCliVersion, name: coreCliName } = pk;
+
+  if (!isProject) {
+    console.log(
+      `Core CLI:\n\t${versionString(
+        coreCliName,
+        coreCliVersion
+      )}\n\nPlugins:\n\tNot in a ymir project, no plugins to show`
+    );
+    return;
+  }
+
+  const ymirPath = helper.ymirProjectFolderPath(cwd);
   const [error, plugins] = await get.allPluginParsed(ymirPath);
   if (error) {
     logger.error('Unable to fetch plugin data', error);
