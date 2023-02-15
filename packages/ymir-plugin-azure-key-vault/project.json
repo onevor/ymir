@@ -11,7 +11,7 @@
         "cwd": "packages/ymir-plugin-azure-key-vault"
       }
     },
-    "build": {
+    "build:code": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -20,6 +20,14 @@
         "tsConfig": "packages/ymir-plugin-azure-key-vault/tsconfig.lib.json"
       },
       "dependsOn": ["install"]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp -r ./LICENSE ./dist/ymir-plugin-azure-key-vault/LICENSE && cp -r ./README.md ./dist/ymir-plugin-azure-key-vault/README.md",
+        "cwd": "./"
+      },
+      "dependsOn": ["build:code"]
     },
     "publish": {
       "executor": "nx:run-commands",
