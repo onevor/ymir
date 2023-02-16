@@ -204,7 +204,14 @@ export async function registerPlugins(
     async (acc, path): Promise<{ error: any; result: any; files: any }> => {
       const res = await acc;
       const [error, info] = await getPluginInfo(path);
+
       if (error) res.error.push(error);
+      if (!info) {
+        res.result.push(null);
+        res.files.push([null, null]);
+        return res;
+      }
+
       res.result.push(info);
       const fileData = createPluginFileData(info);
       const filePath = nodePath.join(ymirPath, 'plugins', info.alias);
@@ -216,8 +223,13 @@ export async function registerPlugins(
 
   const alreadyExists = [];
   const creating = [];
+
   const { files } = plugins;
   const fileWrites = files.map(async ([path, data]) => {
+    if (!path || !data) {
+      console.error('Unable to write file. Missing data', path, data);
+      return null;
+    }
     if (!overwrite) {
       const exists = await fs.exists(path);
       if (exists) {
