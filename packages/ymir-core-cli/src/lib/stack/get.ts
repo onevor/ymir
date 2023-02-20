@@ -10,6 +10,11 @@ import * as StackT from '../types/stack';
 import * as fs from '../config/helper/fs';
 import * as trans from '../config/parser/transpiler';
 
+export const getStackFilePath = (
+  ymirPath: StackT.YmirPath,
+  stackName: StackT.StackName
+) => nodePath.join(ymirPath, 'stacks', stackName);
+
 export async function stackFile(
   ymirPath: StackT.YmirPath,
   stackName: StackT.StackName
