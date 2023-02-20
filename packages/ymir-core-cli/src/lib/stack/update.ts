@@ -1,20 +1,27 @@
 /**
  * All updates to a stack should happen here;
  */
-import * as nodePath from 'path';
-
 import { YmirPath, StackName } from '../types/stack';
 import * as fs from '../config/helper/fs';
 import * as get from './get';
 import * as trans from '../config/parser/transpiler';
+
+import { YmirError } from '../types/response';
+
+type UpdateStackError = YmirError & {
+  stackName: StackName;
+  stackPath: string;
+};
+
+type UpdateStackResult = [UpdateStackError | null, string | null];
 
 // TODO: type stackProperties
 export async function getAndMerge(
   ymirPath: YmirPath,
   stackName: StackName,
   stackProperties: any
-) {
-  const stackPath = nodePath.join(ymirPath, 'stacks', stackName);
+): Promise<UpdateStackResult> {
+  const stackPath = get.getStackFilePath(ymirPath, stackName);
   const stackExists = await fs.exists(stackPath);
   if (!stackExists) {
     return [
@@ -44,4 +51,19 @@ export async function getAndMerge(
 
   await fs.writeFile(stackPath, stackFileUpdated, 'utf8');
   return [null, stackFileUpdated];
+}
+
+export async function addNewProperty(
+  ymirPath: YmirPath,
+  stackName: StackName,
+  prop: any
+): Promise<UpdateStackResult> {
+  const data = {
+    [prop.key]: {
+      path: prop.path,
+      'resolver?': prop.resolver,
+    },
+  };
+
+  return getAndMerge(ymirPath, stackName, data);
 }
