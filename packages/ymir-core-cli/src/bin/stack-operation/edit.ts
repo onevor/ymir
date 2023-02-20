@@ -230,7 +230,7 @@ export async function add(args: any, ctx: any) {
   const [valError, data] = await validateCommand(args, ctx, addDef, 'add');
   if (valError) return console.error(valError.message);
 
-  const { cwd, key, opt, ymirPath } = data;
+  const { key, opt, ymirPath } = data;
 
   if (opt.help) {
     return help.log(
@@ -240,19 +240,17 @@ export async function add(args: any, ctx: any) {
     );
   }
 
-  // const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
-  // if (!isValid) return console.error(valMessage);
-
   const [stackError, stackName] = await getStackNameToUse(opt, ymirPath, ctx);
+
+  if (stackError) {
+    return logger.logError(stackError);
+  }
+
   console.log(
     `${chalk.green('Adding')} new property to stack: "${chalk.blueBright(
       stackName
     )}"`
   );
-
-  if (stackError) {
-    return logger.logError(stackError);
-  }
 
   const stackSource = await stack.get.stackSource(ymirPath, stackName);
   const [resolverError, resolver] = await getResolverToUse(
@@ -311,7 +309,7 @@ export async function add(args: any, ctx: any) {
   return;
 }
 
-export async function update(args: any, ctx: any) {
+export async function remove(args: any, ctx: any) {
   /**
    * Validate
    * help
@@ -322,7 +320,7 @@ export async function update(args: any, ctx: any) {
    */
 }
 
-export async function remove(args: any, ctx: any) {
+export async function update(args: any, ctx: any) {
   /**
    * Validate
    * help
