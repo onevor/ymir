@@ -38,9 +38,14 @@ export async function execCommand(
   });
 }
 
-const distPath = nodePath.join(__dirname, '../../../../../', 'dist');
-const coreCliPath = nodePath.join(distPath, 'ymir-core-cli');
-const ymirBuild = nodePath.join(coreCliPath, 'src', 'bin', 'index.js');
+export const testDirPath = nodePath.resolve(
+  __dirname,
+  '../../../../../',
+  'tmp'
+);
+export const distPath = nodePath.join(__dirname, '../../../../../', 'dist');
+export const coreCliPath = nodePath.join(distPath, 'ymir-core-cli');
+export const ymirBuild = nodePath.join(coreCliPath, 'src', 'bin', 'index.js');
 
 const ymirCurrentBuildSourceString = `source ${nodePath.join(
   __dirname,
