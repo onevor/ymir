@@ -10,6 +10,30 @@ type BaseProperties = {
   config?: any;
 };
 
+/**
+ * Retrieve information about one or more parameters in a specific hierarchy.  Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results.
+ *   getParametersByPath
+ *
+ * Get information about one or more parameters by specifying multiple parameter names.  To get information about a single parameter, you can use the GetParameter operation instead.
+ *   getParameters
+ *
+ * Get information about a single parameter by specifying the parameter name.  To get information about more than one parameter at a time, use the GetParameters operation.
+ *   getParameter
+ *
+ * Get information about a parameter. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results.  If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, DescribeParameters retrieves whatever the original key alias was referencing.
+ *    describeParameters
+ *
+ * Delete a list of parameters. After deleting a parameter, wait for at least 30 seconds to create a parameter with the same name.
+ *    deleteParameters
+ *
+ * Delete a parameter from the system. After deleting a parameter, wait for at least 30 seconds to create a parameter with the same name.
+ *   deleteParameter
+ *
+ * Get information about a parameter. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results.  If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, DescribeParameters retrieves whatever the original key alias was referencing.
+ *   describeParameters
+ *
+ */
+
 type Properties = BaseProperties & { value: string };
 
 let _client: SSM;
@@ -91,7 +115,10 @@ export async function update(props: BaseProperties, ctx: any): Promise<void> {
   throw new Error('Not implemented');
 }
 export async function remove(props: BaseProperties, ctx: any): Promise<void> {
-  throw new Error('Not implemented');
+  const { path } = props;
+  const ssm = _getClient(ctx);
+  await ssm.delete(path);
+  return;
 }
 
 function _createPathFromKeyAndStackName(key: string, stackName?: string) {
