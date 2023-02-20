@@ -16,6 +16,7 @@ export async function fileExistsByAlias(
     return [
       {
         code: 'PLUGIN_CONFIG_NOT_FOUND',
+        message: 'Plugin file not found',
         path: pluginPath,
         alias,
       },
