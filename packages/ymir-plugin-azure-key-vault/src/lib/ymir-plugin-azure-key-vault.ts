@@ -91,7 +91,7 @@ export async function resolveAll(
   return Promise.all(resolved);
 }
 
-function _createPathFromKeyAndStackName(key: string, stackName?: string) {
+export function createPathFromKeyAndStackName(key: string, stackName?: string) {
   const name = key.toLowerCase().trim().split('_').join('-');
   const path = `${stackName || 'default'}-${
     randomUUID().split('-')[0]
@@ -107,7 +107,7 @@ export async function importEnv(
   const entries = Object.entries(data) as [string, string][];
   const properties: Properties[] = entries.map(([key, value]) => {
     // TODO: make a better parser, this is a bit naive.
-    const path = _createPathFromKeyAndStackName(key, payload.stackName);
+    const path = createPathFromKeyAndStackName(key, payload.stackName);
     const props: Properties = {
       key,
       value,
