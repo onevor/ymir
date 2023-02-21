@@ -14,6 +14,30 @@ type UpdateStackError = YmirError & {
 };
 
 type UpdateStackResult = [UpdateStackError | null, string | null];
+type UpdateStackConfigResult = [UpdateStackError | null, true | null];
+
+export async function updateConfigFile(
+  ymirPath: YmirPath,
+  stackName: StackName,
+  configData: string
+): Promise<UpdateStackConfigResult> {
+  const stackPath = get.getConfigFilePath(ymirPath, stackName);
+  const stackExists = await fs.exists(stackPath);
+  if (!stackExists) {
+    return [
+      {
+        code: 'STACK_CONFIG_NOT_FOUND',
+        message: 'Unable to update stack config, stack config not found',
+        stackName,
+        stackPath,
+      },
+      null,
+    ];
+  }
+
+  await fs.writeFile(stackPath, configData, 'utf8');
+  return [null, true];
+}
 
 // TODO: type stackProperties
 export async function getAndMerge(
