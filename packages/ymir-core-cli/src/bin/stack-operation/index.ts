@@ -15,6 +15,8 @@ import * as help from '../lib/help';
 
 export { add, update, remove } from './edit';
 
+import { logger } from '../../lib/util/logger';
+
 const chalk: any = Chalk;
 
 /**
@@ -38,17 +40,17 @@ export async function init(args: any, ctx: any) {
 
   await initLib.init(cwd, opt.relativePath, opt.absolutePath);
 
-  console.log(`New ymir project created at ${chalk.green(cwd)}`);
+  logger.log(`New ymir project created at ${chalk.green(cwd)}`);
 
   const ymirPath = helper.ymirProjectFolderPath(cwd);
   const pluginPaths = await reg.fullPluginResolve(cwd);
 
   if (pluginPaths.length === 0) {
-    console.warn(chalk.red('Unable to locate any plugins to install'));
+    logger.warn(chalk.red('Unable to locate any plugins to install'));
     return;
   }
 
-  console.log(
+  logger.log(
     `\nFound ${chalk.green(
       pluginPaths.length
     )} plugins to install:\n\t${chalk.green(pluginPaths.join('\n\t'))}`
@@ -56,7 +58,7 @@ export async function init(args: any, ctx: any) {
 
   const resolved = await reg.registerPlugins(ymirPath, pluginPaths);
 
-  console.log(
+  logger.log(
     `\n${chalk.green(
       resolved.creating.length
     )} Plugins were installed:\n\t${chalk.green(
@@ -65,7 +67,7 @@ export async function init(args: any, ctx: any) {
   );
 
   if (resolved.alreadyExists.length !== 0) {
-    console.warn(
+    logger.warn(
       `\nUse ${chalk.red('[--force|-f]')} to ${chalk.red(
         'force'
       )} plugin file update.\n\tThe following plugins were already installed:\n\t\t${chalk.red(
@@ -80,7 +82,7 @@ export async function checkoutStack(args: any, ctx: any) {
   const { cwd } = ctx;
   const inProject = await helper.projectExists(cwd);
   if (!inProject) {
-    console.error('Not in a ymir project');
+    logger.error('Not in a ymir project');
     return;
   }
   // TODO: add helper here too?
@@ -122,7 +124,7 @@ export async function checkoutStack(args: any, ctx: any) {
   }
 
   if (opt.name && subCommand) {
-    console.warn(
+    logger.warn(
       `Provided two names for checkout, ignoring ${opt.name}, and using ${subCommand}\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]\n\n\tDo not combine the two`
     );
   }
@@ -130,7 +132,7 @@ export async function checkoutStack(args: any, ctx: any) {
   const stack = subCommand || opt.name;
 
   if (!stack) {
-    console.error(
+    logger.error(
       `Invalid command: missing stack name to checkout\n\tymir checkout <stack-name>\n\tOR\n\tymir checkout -n [stack-name]`
     );
     return;
@@ -139,20 +141,20 @@ export async function checkoutStack(args: any, ctx: any) {
   const exists = await helper.stackExists(cwd, stack);
 
   if (!exists && !opt.create) {
-    console.error(`Stack ${stack} does not exist`);
+    logger.error(`Stack ${stack} does not exist`);
     return;
   }
 
   if (!exists && opt.create) {
-    console.log(`Creating stack ${stack}`);
+    logger.log(`Creating stack ${stack}`);
     await createNewStack(cwd, stack);
   }
 
-  console.log(`Checking out stack ${stack}`);
+  logger.log(`Checking out stack ${stack}`);
   await coLib.checkoutStack(cwd, stack);
 
   if (opt.ignoreExport || opt.create) {
-    console.log(`Skipping export of stack ${stack}`);
+    logger.log(`Skipping export of stack ${stack}`);
     return;
   }
 
@@ -204,7 +206,7 @@ export async function stack(args: any, ctx: any) {
     });
   }
 
-  console.log(`\t${stacks.join('\n\t')}`);
+  logger.log(`\t${stacks.join('\n\t')}`);
   return;
 }
 
@@ -226,7 +228,7 @@ export async function create(args: any, ctx: any) {
   }
 
   if (opt.name && subCommand) {
-    console.warn(
+    logger.warn(
       `Provided two names, ignoring ${opt.name}, and using ${subCommand}\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]\n\n\tDo not combine the two`
     );
   }
@@ -234,7 +236,7 @@ export async function create(args: any, ctx: any) {
   const name = subCommand || opt.name;
 
   if (!name) {
-    console.error(
+    logger.error(
       `Invalid command: missing stack name to create\n\tymir create <stack-name>\n\tOR\n\tymir create -n [stack-name]`
     );
     return;
@@ -243,7 +245,7 @@ export async function create(args: any, ctx: any) {
   const exists = await helper.stackExists(cwd, name);
 
   if (exists) {
-    console.error(`Stack "${name}" does already exist`);
+    logger.error(`Stack "${name}" does already exist`);
     return;
   }
 
@@ -273,7 +275,7 @@ export async function deleteStack(args: any, ctx: any) {
   }
 
   if (opt.name && subCommand) {
-    console.warn(
+    logger.warn(
       `Provided two names for delete, ignoring ${opt.name}, and using ${subCommand}\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]\n\n\tDo not combine the two`
     );
   }
@@ -281,21 +283,21 @@ export async function deleteStack(args: any, ctx: any) {
   const name = subCommand || opt.name;
 
   if (!name) {
-    console.error(
+    logger.error(
       `Invalid command: missing stack name to delete\n\tymir delete <stack-name>\n\tOR\n\tymir delete -n [stack-name]`
     );
     return;
   }
 
   if (name === 'default') {
-    console.error('Can not delete the default stack');
+    logger.error('Can not delete the default stack');
     return;
   }
 
   const exists = await helper.stackExists(cwd, name);
 
   if (!exists) {
-    console.error(`Stack "${name}" does not exist`);
+    logger.error(`Stack "${name}" does not exist`);
     return;
   }
 
@@ -309,7 +311,7 @@ export async function deleteStack(args: any, ctx: any) {
   }
 
   if (!opt.force) {
-    console.warn(
+    logger.warn(
       `Can not delete the current checkout stack: "${name}"\n\t need to use: (--force|-f) \n\t ymir delete \n\t\t--name|-n [name] \n\t\t--force|-f \n\t\t--checkout|-c [name of branch to checkout]`
     );
     return;
@@ -317,12 +319,12 @@ export async function deleteStack(args: any, ctx: any) {
   const checkout = opt.checkout || 'default';
   const coExists = await helper.stackExists(cwd, checkout);
   if (!coExists) {
-    console.error(
+    logger.error(
       `Can not delete current stack, the selected checkout stack "${checkout}" does not exist:\n\tNeed to add a checkout stack (--checkout|-c)\n\tymir delete \n\t\t--name|-n [name] \n\t\t--force|-f \n\t\t--checkout|-c [name of branch to checkout]`
     );
     return;
   }
-  console.log(
+  logger.log(
     `Checking out stack: "${checkout}", before deleting current stack: "${name}"`
   );
   await checkoutStack(cwd, checkout);

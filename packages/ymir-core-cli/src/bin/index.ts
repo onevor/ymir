@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as commandLineArgs from 'command-line-args';
+import { logger } from '../lib/util/logger';
 
 import {
   init,
@@ -14,7 +15,7 @@ import {
 import { install } from './plugin-operation';
 import { exportStack, importStack } from './resolve';
 
-import { version } from './general-operation';
+import { version, config } from './general-operation';
 
 import * as help from './lib/help';
 
@@ -49,6 +50,7 @@ const commands = {
   import: (args: any, ctx: any) => importStack(args, ctx),
 
   version: (args: any, ctx: any) => version(args, ctx),
+  config: (args: any, ctx: any) => config(args, ctx),
 };
 
 async function main() {
@@ -66,7 +68,7 @@ async function main() {
   }
 
   if (!Object.hasOwnProperty.call(commands, mainOptions.command)) {
-    console.error(`"${mainOptions.command}" is not a valid command`);
+    logger.error(`"${mainOptions.command}" is not a valid command`);
   }
   return commands[mainOptions.command](argv, ctx);
 }

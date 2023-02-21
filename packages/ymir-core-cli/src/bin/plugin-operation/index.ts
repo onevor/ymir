@@ -8,6 +8,7 @@ import { isInProject, validateRequiredProps } from '../lib/index';
 
 import * as help from '../lib/help';
 import * as reg from '../../lib/plugin/register-plugin';
+import { logger } from '../../lib/util/logger';
 
 const chalk: any = Chalk;
 
@@ -43,7 +44,7 @@ export async function legacyInstall(args: any, ctx: any) {
   const [isValid, valMessage] = validateRequiredProps(opt, ['alias'], ctx);
 
   if (!isValid) {
-    console.error(valMessage);
+    logger.error(valMessage);
     return;
   }
 
@@ -60,12 +61,12 @@ export async function legacyInstall(args: any, ctx: any) {
   if (!hasBase) {
     const missingPropsErrorHead = `Missing required properties for install command:\n`;
     const missingPropsErrorExplanation = `Need to supply either\n\t--name|-n [npm package name]\n\t--alias|-a [alias name for plugin]\n\tor\n\t--path|-p [path to the installed package]\n\t--alias|-a [alias name for plugin]`;
-    console.error(`${missingPropsErrorHead}${missingPropsErrorExplanation}`);
+    logger.error(`${missingPropsErrorHead}${missingPropsErrorExplanation}`);
     return;
   }
 
   if (isInstallByPath) {
-    console.log('Installing plugin by path...\n');
+    logger.log('Installing plugin by path...\n');
     const ymirPath = helper.ymirProjectFolderPath(cwd);
     const [error, response] = await installLib.installPluginWithPath(
       ymirPath,
@@ -75,22 +76,22 @@ export async function legacyInstall(args: any, ctx: any) {
     );
 
     if (error) {
-      console.error(
+      logger.error(
         `Error installing plugin: \n\tCODE:\n\t\t"${error.code}"\n\tMESSAGE:\n\t\t"${error.message}"`
       );
       return;
     }
-    console.log('Plugin installed successfully');
+    logger.log('Plugin installed successfully');
     return;
   }
 
   if (isInstallByName) {
-    console.log('Installing plugin by name...\n');
-    console.error('Not implemented yet');
+    logger.log('Installing plugin by name...\n');
+    logger.error('Not implemented yet');
     return;
   }
 
-  console.error('Error: invalid code path, should not be able to get here');
+  logger.error('Error: invalid code path, should not be able to get here');
 }
 
 export async function resolvePlugins(args: any, ctx: any) {
@@ -110,11 +111,11 @@ export async function resolvePlugins(args: any, ctx: any) {
   const pluginPaths = await reg.fullPluginResolve(cwd);
 
   if (pluginPaths.length === 0) {
-    console.warn(chalk.red('\nUnable to locate any plugins to install'));
+    logger.warn(chalk.red('\nUnable to locate any plugins to install'));
     return;
   }
 
-  console.log(
+  logger.log(
     `\nFound ${chalk.green(
       pluginPaths.length
     )} plugins to install:\n\t${chalk.green(pluginPaths.join('\n\t'))}`
@@ -122,7 +123,7 @@ export async function resolvePlugins(args: any, ctx: any) {
 
   const resolved = await reg.registerPlugins(ymirPath, pluginPaths, force);
 
-  console.log(
+  logger.log(
     `\n${chalk.green(
       resolved.creating.length
     )} Plugins were installed:\n\t${chalk.green(
@@ -131,7 +132,7 @@ export async function resolvePlugins(args: any, ctx: any) {
   );
 
   if (resolved.alreadyExists.length !== 0) {
-    console.warn(
+    logger.warn(
       `\nUse ${chalk.red('[--force|-f]')} to ${chalk.red(
         'force'
       )} plugin file update.\n\tThe following plugins were already installed:\n\t\t${chalk.red(
@@ -141,7 +142,7 @@ export async function resolvePlugins(args: any, ctx: any) {
   }
 
   if (resolved.resolved.error.length !== 0) {
-    console.error(
+    logger.error(
       `\n${chalk.red(
         'The following plugins had errors:'
       )}\n\t${resolved.resolved.error.join('\n\t')}`

@@ -2,6 +2,7 @@ import * as nodePath from 'path';
 
 import * as fs from '../../../config/helper/fs';
 import { execCommand } from '../../../cmd';
+import { logger } from '../../../util/logger';
 
 export async function locateNearestPackageJson(cwd: string) {
   return await fs.findNearestFileTop(cwd, 'package.json');
@@ -78,7 +79,7 @@ export async function locateInstallPathForPk(cwd: string, pkName: string) {
   if (isPkInstalled) {
     const nodeModulesPath = await locateNearestNodeModules(cwd);
     if (!nodeModulesPath) {
-      console.error(
+      logger.error(
         `Pk is installed in project package.json, but unable to locate node_modules folder; please install`
       );
       return;
@@ -88,19 +89,19 @@ export async function locateInstallPathForPk(cwd: string, pkName: string) {
       pkName
     );
     if (!isInstalled) {
-      console.error(msg);
+      logger.error(msg);
       return;
     }
-    console.log('Pk is installed in local project.json');
+    logger.log('Pk is installed in local project.json');
     return nodePath.join(nodeModulesPath, pkName);
   }
-  console.log(
+  logger.log(
     `Pk is not installed in local project.json, checking if installed globally`
   );
 
   const globalNodeModulesPath = await locateGlobalNodeModulesPath();
   if (!globalNodeModulesPath) {
-    console.error(`Unable to locate global node_modules folder`);
+    logger.error(`Unable to locate global node_modules folder`);
     return;
   }
   const [isInstalled, msg] = await checkIfPackageIsInstalledInNodeModules(
@@ -108,9 +109,9 @@ export async function locateInstallPathForPk(cwd: string, pkName: string) {
     pkName
   );
   if (!isInstalled) {
-    console.error(msg);
+    logger.error(msg);
     return;
   }
-  console.log('Pk is globally installed');
+  logger.log('Pk is globally installed');
   return nodePath.join(globalNodeModulesPath, pkName);
 }
