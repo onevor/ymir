@@ -16,6 +16,8 @@ import * as fs from '../../lib/config/helper/fs';
 import { isInProject, validateRequiredProps } from '../lib/index';
 import * as help from '../lib/help';
 
+import { logger } from '../../lib/util/logger';
+
 function getEnvPath(args: any, ctx: any) {
   const { cwd } = ctx;
   const { path } = args;
@@ -33,7 +35,7 @@ export async function getEnvData(args: any, ctx: any) {
     const data = await fs.readFile(path, 'utf8');
     return [null, dotenv.parse(data)];
   } catch (error) {
-    console.error('Error reading env file', error);
+    logger.error('Error reading env file', error);
     return [
       {
         code: 'UNABLE_TO_READ_FILE',
@@ -131,7 +133,7 @@ export async function importStack(args: any, ctx: any) {
   const [isValid, valMessage] = validateRequiredProps(opt, ['path'], ctx);
 
   if (!isValid) {
-    console.error(valMessage);
+    logger.error(valMessage);
     return;
   }
 
@@ -139,7 +141,7 @@ export async function importStack(args: any, ctx: any) {
   const [targetStackErr, targetStack] = await getStackToUse(ymirPath, opt);
 
   if (targetStackErr) {
-    console.error('Unable to get stack', targetStackErr);
+    logger.error('Unable to get stack', targetStackErr);
     return;
   }
 
@@ -147,7 +149,7 @@ export async function importStack(args: any, ctx: any) {
   const [resolverAliasErr, resolverAlias] = getResolverToUse(opt, stackSource);
 
   if (resolverAliasErr) {
-    console.error('No resolver was found', resolverAliasErr);
+    logger.error('No resolver was found', resolverAliasErr);
     return;
   }
 
@@ -157,13 +159,13 @@ export async function importStack(args: any, ctx: any) {
   );
 
   if (pluginValErr) {
-    console.error('Unable to validate plugin', pluginValErr);
+    logger.error('Unable to validate plugin', pluginValErr);
     return;
   }
 
   const [envDataErr, envData] = await getEnvData(opt, ctx);
   if (envDataErr) {
-    console.error('Unable to read env file', envDataErr);
+    logger.error('Unable to read env file', envDataErr);
     return;
   }
 
@@ -174,7 +176,7 @@ export async function importStack(args: any, ctx: any) {
   );
 
   if (resolverConfErr) {
-    console.error('Unable to get resolver config', resolverConfErr);
+    logger.error('Unable to get resolver config', resolverConfErr);
     return;
   }
 
@@ -186,7 +188,7 @@ export async function importStack(args: any, ctx: any) {
   );
 
   if (resolverLoadErr) {
-    console.error('Unable to load resolver', resolverLoadErr);
+    logger.error('Unable to load resolver', resolverLoadErr);
     return;
   }
 
@@ -201,9 +203,9 @@ export async function importStack(args: any, ctx: any) {
   );
 
   if (updateErr) {
-    console.error('Unable to update stack', updateErr);
+    logger.error('Unable to update stack', updateErr);
     return;
   }
-  console.log('Imported stack successfully: \n', update);
+  logger.log('Imported stack successfully: \n', update);
   return;
 }

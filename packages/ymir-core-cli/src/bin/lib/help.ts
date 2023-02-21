@@ -1,5 +1,5 @@
 import * as Chalk from 'chalk';
-
+import { logger } from '../../lib/util/logger';
 const chalk: any = Chalk;
 
 export const missingCommandError = chalk.red('No command specified: ');
@@ -29,7 +29,7 @@ export function logMain(methods: string[], header?: string) {
       '-h'
     )}\n`
   );
-  console.log(help.join(''));
+  logger.info(help.join(''));
 }
 
 export function log(
@@ -67,5 +67,5 @@ export function log(
 
   help.push(`\t${flags.join('\n\t')}`);
 
-  console.log(help.join(''));
+  logger.info(help.join(''));
 }

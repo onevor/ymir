@@ -6,6 +6,7 @@ import * as getPlugin from '../plugin/get-plugin';
 import * as getStack from '../stack/get';
 
 import { entriesToEnvFile } from '../dotfile';
+import { logger } from '../util/logger';
 
 export async function _export(ymirPath: string, stackName: string) {
   const stackSource = await getStack.stackSource(ymirPath, stackName);
@@ -13,7 +14,7 @@ export async function _export(ymirPath: string, stackName: string) {
     getPlugin.defaultResolver(stackSource);
 
   if (defaultResolverErr) {
-    console.error(defaultResolverErr.message, defaultResolverErr);
+    logger.error(defaultResolverErr.message, defaultResolverErr);
     return;
   }
 
@@ -23,7 +24,7 @@ export async function _export(ymirPath: string, stackName: string) {
   );
 
   if (resolverConfErr) {
-    console.error('Unable to create resolver config: ', resolverConfErr);
+    logger.error('Unable to create resolver config: ', resolverConfErr);
     return;
   }
 
@@ -40,7 +41,7 @@ export async function _export(ymirPath: string, stackName: string) {
   const fileConf = data.stackConfig.FILE || data.defaultStackConfig.FILE;
 
   if (!fileConf) {
-    console.error('No FILE config found in stack or default stack');
+    logger.error('No FILE config found in stack or default stack');
     return;
   }
 

@@ -1,6 +1,7 @@
 import * as commandLineArgs from 'command-line-args';
 
 import * as helper from '../../lib/config/helper';
+import { logger } from '../../lib/util/logger';
 
 export const formatKey = (key: string) => key.trim().toUpperCase();
 
@@ -8,7 +9,7 @@ export async function isInProject(exitIfNot = false, ctx: any) {
   const { cwd } = ctx;
   const inProject = await helper.projectExists(cwd);
   if (!inProject) {
-    console.error('Not in a ymir project');
+    logger.error('Not in a ymir project');
     if (exitIfNot) {
       return process.exit(1);
     }

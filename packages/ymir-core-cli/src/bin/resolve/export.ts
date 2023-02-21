@@ -6,6 +6,7 @@ import plugin from '../../lib/plugin';
 
 import { isInProject } from '../lib/index';
 import * as help from '../lib/help';
+import { logger } from '../../lib/util/logger';
 
 export async function exportStack(args: any, ctx: any) {
   const { cwd } = ctx;
@@ -23,7 +24,7 @@ export async function exportStack(args: any, ctx: any) {
   const stackExists = await fs.stackExists(cwd, stackName);
 
   if (!stackExists) {
-    console.error(`Stack ${stackName} does not exist`);
+    logger.error(`Stack ${stackName} does not exist`);
     return;
   }
 

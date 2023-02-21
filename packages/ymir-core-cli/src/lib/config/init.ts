@@ -6,6 +6,7 @@ import { exists } from '../fs';
 import { ymirProjectFolderPath, getYmirProjectPath } from './helper';
 
 import * as trans from './parser/transpiler';
+import { logger } from '../util/logger';
 
 type KeyMap = { [key: string]: string };
 type ValueMap = { [key: string]: Record<string, any> };
@@ -63,32 +64,32 @@ const ymirRootStructure = [
   (basePath: string, data = '[dev]: ./stacks/dev') => {
     const name = 'current_stack';
     const path = nodePath.join(basePath, name);
-    // console.log(`Creating file: ${name} at path: ${path}`);
+    // log('log',`Creating file: ${name} at path: ${path}`);
     return fs.writeFile(path, data);
   },
   (basePath: string) => {
     const name = 'stacks';
     const path = nodePath.join(basePath, name);
-    // console.log(`Creating dir: ${name} at path: ${path}`);
+    // log('log',`Creating dir: ${name} at path: ${path}`);
     return fs.mkdir(path);
   },
   (basePath: string) => {
     const name = 'stack-config';
     const path = nodePath.join(basePath, name);
-    // console.log(`Creating dir: ${name} at path: ${path}`);
+    // log('log',`Creating dir: ${name} at path: ${path}`);
     return fs.mkdir(path);
   },
   (basePath: string) => {
     const name = 'plugins';
     const path = nodePath.join(basePath, name);
-    // console.log(`Creating dir: ${name} at path: ${path}`);
+    // log('log',`Creating dir: ${name} at path: ${path}`);
     return fs.mkdir(path);
   },
 ];
 
 async function createNewFile(basePath: string, name: string, data: string) {
   const path = nodePath.join(basePath, name);
-  // console.log(`Creating file: ${name} at path: ${path}`);
+  // log('log',`Creating file: ${name} at path: ${path}`);
   return fs.writeFile(path, data);
 }
 
@@ -110,7 +111,7 @@ const ymirPluginStructure = [
   (basePath: string, data = 'stuff from rc here') => {
     const name = 'ssm';
     const path = nodePath.join(basePath, name);
-    // console.log(`Creating file: ${name} at path: ${path}`);
+    // log('log',`Creating file: ${name} at path: ${path}`);
     return fs.writeFile(path, data);
   },
 ];
@@ -201,7 +202,7 @@ export async function setupProjectFolder(
     return;
   } catch (error) {
     // TODO: if it fail, we should clean it up, remove the folder, so that we remove any file created;
-    console.error('Unable to set up project folder', error);
+    logger.error('Unable to set up project folder', error);
     throw error;
   }
 }
@@ -219,9 +220,9 @@ export async function init(
     throw new Error(`Ymir config already exists at ${path}`);
   }
 
-  // console.log(`Creating Ymir project dir at ${path}...`);
+  // log('log',`Creating Ymir project dir at ${path}...`);
   await createYmirProjectFolder(cwd, relativePath, absolutePath);
-  // console.log(`Setting up Ymir project dir at ${path}...`);
+  // log('log',`Setting up Ymir project dir at ${path}...`);
   await setupProjectFolder(cwd, relativePath, absolutePath);
 
   return;

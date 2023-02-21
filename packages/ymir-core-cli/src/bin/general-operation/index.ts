@@ -3,6 +3,9 @@ import * as nodePath from 'path';
 import * as helper from '../../lib/config/helper';
 import { isInProject } from '../lib/index';
 import * as get from '../../lib/plugin/get-plugin';
+import { logger } from '../../lib/util/logger';
+
+export { config } from './config';
 
 async function getVersionDataFromPlugin(plugin: any): Promise<[any, any]> {
   const hasDescribe = Object.hasOwnProperty.call(plugin, 'DESCRIBE');
@@ -53,7 +56,7 @@ export async function version(args: any, ctx: any) {
   const { version: coreCliVersion, name: coreCliName } = pk;
   const [error, plugins] = await get.allPluginParsed(ymirPath);
   if (error) {
-    console.error('Unable to fetch plugin data', error);
+    logger.error('Unable to fetch plugin data', error);
     return;
   }
 
@@ -71,17 +74,17 @@ export async function version(args: any, ctx: any) {
     );
 
     if (errors.length !== 0) {
-      console.error('Unable to fetch all plugin versions', errors);
+      logger.error('Unable to fetch all plugin versions', errors);
     }
     const pluginVersionString = versionPlugin.join('\n\t');
-    console.log(
+    logger.info(
       `Core CLI:\n\t${versionString(
         coreCliName,
         coreCliVersion
       )}\n\nPlugins:\n\t${pluginVersionString}`
     );
   } catch (error) {
-    console.error('Unable to fetch plugin version', error);
+    logger.error('Unable to fetch plugin version', error);
     return;
   }
 }

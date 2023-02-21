@@ -7,6 +7,7 @@ import * as check from '../resolve/check-install';
 import * as fs from '../config/helper/fs';
 import { StackSource, YmirPath, StackParsed } from '../types/stack';
 import * as trans from '../config/parser/transpiler';
+import { logger } from '../util/logger';
 
 type ErrorResponse = {
   code: string;
@@ -49,7 +50,7 @@ export async function pluginFileByAlias(
     const pluginFile = await fs.readFile(pluginPath, 'utf8');
     return [null, pluginFile];
   } catch (error) {
-    console.error('Unable to get plugin file', error);
+    logger.error('Unable to get plugin file', error);
     return [
       {
         code: 'UNABLE_TO_GET_PLUGIN_FILE',

@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 
 import { parse as dotParse } from 'dotenv';
+import { logger } from './util/logger';
 
 export type StringUnknownPair = [string, unknown];
 
@@ -36,7 +37,7 @@ export function removeEnvFromFile(
 ): string {
   const copy = { ...env };
   if (!copy[key]) {
-    console.warn(`Key ${key} not found in env file`);
+    logger.warn(`Key ${key} not found in env file`);
     const entries: StringUnknownPair[] = Object.entries(copy);
     return entriesToEnvFile(entries);
   }
@@ -52,7 +53,7 @@ export function updateValueFile(
 ): string {
   const copy = { ...env };
   if (!copy[key]) {
-    console.warn(`Key ${key} not found in env file`);
+    logger.warn(`Key ${key} not found in env file`);
     const entries: StringUnknownPair[] = Object.entries(copy);
     return entriesToEnvFile(entries);
   }

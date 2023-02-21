@@ -1,6 +1,7 @@
 import * as helper from '../helper';
 
 import * as trans from '../parser/transpiler';
+import { logger } from '../../util/logger';
 
 export function getDestinationStackFromOpt(currentStack: string, opt: any) {
   if (opt.globalStack && opt.destinationStack) {
@@ -70,7 +71,7 @@ export async function updateProperty(
     await helper.getParsedStackData(projectPath, stackName, true);
 
   if (!Object.hasOwnProperty.call(currentStackContent, key)) {
-    console.warn(
+    logger.warn(
       `Tried to edit key ${key} from stack ${stackName}, but key does not exist.`
     );
     return;
@@ -103,7 +104,7 @@ export async function removeProperty(
   );
 
   if (!Object.hasOwnProperty.call(currentStackContent, key)) {
-    console.warn(
+    logger.warn(
       `Tried to delete key ${key} from stack ${stackName}, but key does not exist.`
     );
     return;

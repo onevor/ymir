@@ -9,6 +9,7 @@ import * as nodePath from 'path';
 import * as StackT from '../types/stack';
 import * as fs from '../config/helper/fs';
 import * as trans from '../config/parser/transpiler';
+import { logger } from '../util/logger';
 
 export const getStackFilePath = (
   ymirPath: StackT.YmirPath,
@@ -60,7 +61,7 @@ export async function getMainAndDefault(
     const defaultData = await fs.getFileFromYmir(ymirPath, defaultFilePath);
     return [null, [mainData, defaultData]];
   } catch (error) {
-    console.error('Error getting main and default files', error);
+    logger.error('Error getting main and default files', error);
     return [
       {
         code: 'ERROR_GETTING_MAIN_AND_DEFAULT_FILES',

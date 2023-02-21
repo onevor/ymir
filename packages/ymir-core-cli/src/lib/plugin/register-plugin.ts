@@ -8,6 +8,7 @@ import * as nodePath from 'path';
 import { execCommand } from '../cmd';
 import * as fs from '../config/helper/fs';
 import * as trans from '../config/parser/transpiler';
+import { logger } from '../util/logger';
 
 export type PluginPath = string;
 
@@ -22,7 +23,7 @@ export async function getNodeModulesPath(global = false) {
     if (!exists) return '';
     return path;
   } catch (error) {
-    console.log('Error getting node modules path', error);
+    logger.log('Error getting node modules path', error);
     return '';
   }
 }
@@ -34,7 +35,7 @@ export async function lsNodeModules(path: string): Promise<string[]> {
     if (error.code === 'ENOENT') {
       return [];
     }
-    console.error('Unable to ls node modules', error);
+    logger.error('Unable to ls node modules', error);
     throw new error();
   }
 }
