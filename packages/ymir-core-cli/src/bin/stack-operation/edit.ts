@@ -460,12 +460,12 @@ export async function remove(args: any, ctx: any) {
 }
 
 export async function update(args: any, ctx: any) {
-  /**
-   * Validate
-   * help
-   *
-   * Resolver method
-   *
-   * Update stack
-   */
+  console.warn(
+    `${chalk.redBright('Update')} creates a ${chalk.bold.green(
+      'new property'
+    )}, it does ${chalk.bold.redBright(
+      'not remove'
+    )} the old one form the external secret store.`
+  );
+  return add(args, ctx);
 }
