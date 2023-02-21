@@ -16,6 +16,11 @@ export const getStackFilePath = (
   stackName: StackT.StackName
 ) => nodePath.join(ymirPath, 'stacks', stackName);
 
+export const getConfigFilePath = (
+  ymirPath: StackT.YmirPath,
+  stackName: StackT.StackName
+) => nodePath.join(ymirPath, 'stack-config', stackName);
+
 export async function stackFile(
   ymirPath: StackT.YmirPath,
   stackName: StackT.StackName
@@ -66,6 +71,27 @@ export async function getMainAndDefault(
       {
         code: 'ERROR_GETTING_MAIN_AND_DEFAULT_FILES',
         message: 'Error getting main and default files',
+      },
+      null,
+    ];
+  }
+}
+
+export async function getConfig(
+  ymirPath: StackT.YmirPath,
+  stackName: string
+): Promise<any> {
+  // TODO: I can return the promise here to speed things up.
+  try {
+    const configPath = nodePath.join('stack-config', stackName);
+    const mainData = await fs.getFileFromYmir(ymirPath, configPath);
+    return [null, mainData];
+  } catch (error) {
+    logger.error('Error getting config file', error);
+    return [
+      {
+        code: 'ERROR_GETTING_CONFIG_FILE',
+        message: 'Error getting config file',
       },
       null,
     ];
