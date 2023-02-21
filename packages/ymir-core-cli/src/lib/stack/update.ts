@@ -67,3 +67,51 @@ export async function addNewProperty(
 
   return getAndMerge(ymirPath, stackName, data);
 }
+
+/**
+ * This code is not very dry, re use a lot form getAndMerge
+ * Split put the get to a function
+ * split out the stack change (cb)
+ * split out the write
+ */
+export async function removeProperty(
+  ymirPath: YmirPath,
+  stackName: StackName,
+  prop: any
+): Promise<UpdateStackResult> {
+  const stackPath = get.getStackFilePath(ymirPath, stackName);
+  const stackExists = await fs.exists(stackPath);
+  if (!stackExists) {
+    return [
+      {
+        code: 'STACK_NOT_FOUND',
+        message: 'Unable to update stack, stack not found',
+        stackName,
+        stackPath,
+      },
+      null,
+    ];
+  }
+  const [currentStackData, currentComments] = await get.parsedStack(
+    ymirPath,
+    stackName,
+    true
+  );
+
+  /**
+   * Could do this with delete currentStackData[prop]
+   * But this is more explicit and typesafe
+   * and i can update it to delete multiple props
+   */
+  const entries = Object.entries(currentStackData);
+  const filtered = entries.filter(([key]) => key !== prop.key);
+  const stackData = Object.fromEntries(filtered);
+
+  const stackFileUpdated = trans.transpileObjectToStack(
+    stackData,
+    currentComments
+  );
+
+  await fs.writeFile(stackPath, stackFileUpdated, 'utf8');
+  return [null, stackFileUpdated];
+}
