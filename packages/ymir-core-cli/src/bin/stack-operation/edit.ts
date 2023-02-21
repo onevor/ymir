@@ -13,6 +13,7 @@ import stack from '../../lib/stack';
 import { YmirError } from '../../lib/types/response';
 import * as logger from '../../lib/util/logger';
 import * as fs from '../../lib/config/helper/fs';
+import * as trans from '../../lib/config/parser/transpiler';
 
 import {
   isInProject,
@@ -44,10 +45,10 @@ const updateDef = [...commonDef];
 const removeDef = [...commonDef];
 
 type ValidationSuccess = {
-  cwd: string;
-  key: string;
   opt: any;
-  ymirPath: string;
+  cwd?: string;
+  key?: string;
+  ymirPath?: string;
 };
 
 type ValidationResult = [YmirError | null, ValidationSuccess | null];
@@ -64,6 +65,10 @@ async function validateCommand(
   const { subCommand, subArgs } = parseSubCommand(args);
 
   const opt = commandLineArgs(def, { argv: subArgs });
+
+  if (opt.help) {
+    return [null, { opt }];
+  }
 
   if (!opt.help && opt.key && subCommand) {
     console.warn(
@@ -135,8 +140,28 @@ async function getStackNameToUse(opt: any, ymirPath: string, ctx: any) {
 async function getResolverAliasToUse(
   opt: any,
   stackSource: StackSource,
-  ymirPath: string
+  ymirPath: string,
+  propResolver?: string
 ) {
+  if (opt.resolver && propResolver) {
+    return [
+      {
+        code: 'INVALID_COMMAND',
+        message: `Supplied resolver: ${chalk.blueBright(
+          opt.resolver
+        )}; but action requires resolver: ${chalk.blueBright(propResolver)}`,
+      },
+      null,
+    ];
+  }
+
+  if (propResolver) {
+    const [propResolverError, validOpt] = await plugin.val.byAlias(
+      ymirPath,
+      propResolver
+    );
+    return [propResolverError, propResolver];
+  }
   const optResolver = opt.resolver;
   if (optResolver) {
     const [optError, validOpt] = await plugin.val.byAlias(
@@ -166,12 +191,14 @@ async function getResolverAliasToUse(
 async function getResolverToUse(
   opt: any,
   stackSource: StackSource,
-  ymirPath: string
+  ymirPath: string,
+  propResolver?: string
 ) {
   const [resolverAliasError, resolverAlias] = await getResolverAliasToUse(
     opt,
     stackSource,
-    ymirPath
+    ymirPath,
+    propResolver
   );
 
   if (resolverAliasError) {
@@ -230,15 +257,15 @@ export async function add(args: any, ctx: any) {
   const [valError, data] = await validateCommand(args, ctx, addDef, 'add');
   if (valError) return console.error(valError.message);
 
-  const { key, opt, ymirPath } = data;
-
-  if (opt.help) {
+  if (data.opt.help) {
     return help.log(
       addDef,
       'Add a new property to a stack',
       help.getUsageText('add', '<key>')
     );
   }
+
+  const { key, opt, ymirPath } = data;
 
   const [stackError, stackName] = await getStackNameToUse(opt, ymirPath, ctx);
 
@@ -310,14 +337,126 @@ export async function add(args: any, ctx: any) {
 }
 
 export async function remove(args: any, ctx: any) {
-  /**
-   * Validate
-   * help
-   *
-   * Resolver method
-   *
-   * Update stack
-   */
+  const [valError, data] = await validateCommand(args, ctx, addDef, 'add');
+  if (valError) return console.error(valError.message);
+
+  if (data.opt.help) {
+    return help.log(
+      addDef,
+      'Remove a property from a stack',
+      help.getUsageText('remove', '<key>')
+    );
+  }
+
+  const { key, opt, ymirPath } = data;
+
+  const [stackError, stackName] = await getStackNameToUse(opt, ymirPath, ctx);
+
+  if (stackError) {
+    return logger.logError(stackError);
+  }
+
+  console.log(
+    `${chalk.green('Removing')} property from stack: "${chalk.blueBright(
+      stackName
+    )}"`
+  );
+
+  const stackSource = await stack.get.stackSource(ymirPath, stackName);
+
+  const [parsed, comments] = await trans.parseStackFile(stackSource.stack);
+
+  const hasProp = Object.prototype.hasOwnProperty.call(parsed, key);
+  if (!hasProp) {
+    return console.error(
+      `${chalk.red('NOT_FOUND:')} Property "${chalk.blueBright(
+        key
+      )}" not found in stack "${chalk.blueBright(stackName)}"`
+    );
+  }
+
+  const stackProps = parsed[key];
+
+  const hasOwnResolver = Object.prototype.hasOwnProperty.call(
+    stackProps,
+    'resolver?'
+  );
+
+  const propResolver = hasOwnResolver ? stackProps['resolver?'] : null;
+
+  const [resolverError, resolver] = await getResolverToUse(
+    opt,
+    stackSource,
+    ymirPath,
+    propResolver
+  );
+
+  if (resolverError) return logger.logError(resolverError);
+
+  const hasRightResolver =
+    hasOwnResolver && stackProps['resolver?'] === resolver.alias;
+  if (hasOwnResolver && !hasRightResolver) {
+    return console.error(
+      `${chalk.red('WRONG_RESOLVER:')} Property "${chalk.blueBright(
+        key
+      )}" is not managed by resolver "${chalk.blueBright(
+        resolver.alias
+      )}" in stack "${chalk.blueBright(
+        stackName
+      )}", it is managed by resolver "${chalk.blueBright(
+        stackProps['resolver?']
+      )}"`
+    );
+  }
+
+  const hasPath = Object.prototype.hasOwnProperty.call(stackProps, 'path');
+  if (!hasPath) {
+    return console.error(
+      `${chalk.red('NO_PATH:')} Property "${chalk.blueBright(
+        key
+      )}" has no path in stack "${chalk.blueBright(stackName)}"`
+    );
+  }
+
+  // TODO: Validate that the path is correct, need to add new method to plugin.
+
+  const path = stackProps.path;
+  const prop = {
+    path,
+    key,
+  };
+
+  const [removeError, removeResult] = await plugin.edit.remove(
+    resolver.plug,
+    prop,
+    resolver.config
+  );
+
+  if (removeError) return logger.logError(removeError);
+
+  console.log(
+    `${chalk.green('Removed')} property: "${chalk.blueBright(
+      key
+    )}" from external secret store.`
+  );
+
+  const [updateError, updateResult] = await stack.update.removeProperty(
+    ymirPath,
+    stackName,
+    {
+      key,
+      path,
+      resolver: resolver.alias,
+    }
+  );
+
+  if (updateError) return logger.logError(updateError);
+
+  console.log(
+    `${chalk.green('Updated')} stack: "${chalk.blueBright(stackName)}"`
+  );
+
+  return;
 }
 
 export async function update(args: any, ctx: any) {
