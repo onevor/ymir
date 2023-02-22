@@ -13,22 +13,6 @@ const chalk: any = Chalk;
 
 import { logger, logError } from '../../lib/util/logger';
 
-/**
- * Should be able to add config to the stacks here
- *
- * - add default resolver
- * - add resolver config
- *   - should ask installed resolvers what they need
- * - change output file
- *
- */
-
-/**
- * TODO: BUG:
- * - Resolver update markes all other props as optional, need a global fix for this
- * - need a config file schema that can mark props, or i need to switch it out to toml soon.
- */
-
 const resolverConfigHeader = (alias: string) =>
   `RESOLVER_CONFIG_${alias.toUpperCase()}`;
 const resolverDefaultHeader = 'DEFAULT_RESOLVER';
@@ -103,10 +87,12 @@ export async function configFile(args: any, ctx: any) {
     name: envFileName,
   };
 
-  const configData = trans.transpileObjectToStack(content, comments, [
-    'path',
-    'name',
-  ]);
+  const requiredProps = stack.schema.getRequiredPropsForConfig(content);
+  const configData = trans.transpileObjectToStack(
+    content,
+    comments,
+    requiredProps
+  );
 
   return stack.update.updateConfigFile(ymirPath, targetStack, configData);
 }
@@ -127,20 +113,6 @@ export function parseResolverConfigFromOpt(config: string[]): [string[], any] {
     }
   });
   return [errors, configObj];
-}
-
-export function getAllRequiredProps(data) {
-  const entries = Object.entries(data);
-  const requiredProps = ['name', 'alias'];
-
-  entries.forEach(([key, value]) => {
-    if (key.substring(0, 16) === resolverConfigHeader('')) {
-      const props = Object.keys(value);
-      requiredProps.push(...props);
-    }
-  });
-
-  return requiredProps;
 }
 
 export async function configResolver(args: any, ctx: any) {
@@ -218,6 +190,7 @@ export async function configResolver(args: any, ctx: any) {
     );
   }
 
+  // TODO: log resolver conf changes here too;
   if (configUpdates.DEFAULT_RESOLVER) {
     logger.info(
       `${chalk.green('Setting')} default resolver to ${chalk.blue(
@@ -250,7 +223,7 @@ export async function configResolver(args: any, ctx: any) {
 
   const merged = { ...parsed, ...mergedProps };
 
-  const requiredProps = getAllRequiredProps(merged);
+  const requiredProps = stack.schema.getRequiredPropsForConfig(merged);
 
   const configData = trans.transpileObjectToStack(
     merged,
@@ -259,7 +232,6 @@ export async function configResolver(args: any, ctx: any) {
   );
 
   return stack.update.updateConfigFile(ymirPath, targetStack, configData);
-  // TODO: log resolver conf changes here too;
 }
 
 const configHandlers = {
