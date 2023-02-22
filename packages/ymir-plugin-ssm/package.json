@@ -26,6 +26,6 @@
     "url": "https://github.com/onevor/ymir/issues"
   },
   "dependencies": {
-    "aws-sdk": "^2.1212.0"
+    "aws-sdk": "^2.1320.0"
   }
 }
