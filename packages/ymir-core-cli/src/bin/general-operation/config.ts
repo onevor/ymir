@@ -68,13 +68,38 @@ export async function configResolver(args: any, ctx: any) {
   const { subCommand, subArgs } = parseSubCommand(args);
 
   const def = [
-    { name: 'default', alias: 'd', type: Boolean },
-    { name: 'config', alias: 'c', type: String, multiple: true },
-    { name: 'stack', alias: 's', type: String },
+    {
+      name: 'default',
+      alias: 'd',
+      type: Boolean,
+      description: 'Set this resolver as default',
+    },
+    {
+      name: 'config',
+      alias: 'c',
+      type: String,
+      multiple: true,
+      description: 'Add config to resolver: -c key1=value2 -c key2=value2',
+    },
+    {
+      name: 'stack',
+      alias: 's',
+      type: String,
+      description:
+        'The name of the stack to add config to, default to default stack',
+    },
     help.def,
   ];
 
   const opt = commandLineArgs(def, { argv: subArgs });
+
+  if (opt.help) {
+    return help.log(
+      def,
+      'Edit the resolver config',
+      help.getUsageText('config resolver', '<resolver-alias>')
+    );
+  }
 
   const resolverAlias = subCommand;
 
@@ -168,7 +193,18 @@ export async function config(args: any, ctx: any) {
 
   const { subCommand, subArgs } = parseSubCommand(args);
 
-  // TODO: Add help
+  const def = [help.def];
+
+  const opt = commandLineArgs(def, { argv: subArgs });
+
+  // TODO: needs a help logger that works with sub commands;
+  if (opt.help) {
+    return help.log(
+      def,
+      'Edit stack config',
+      help.getUsageText('config file|resolver')
+    );
+  }
 
   const hasHandler = Object.prototype.hasOwnProperty.call(
     configHandlers,
