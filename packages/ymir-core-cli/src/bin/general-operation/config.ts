@@ -23,12 +23,92 @@ import { logger, logError } from '../../lib/util/logger';
  *
  */
 
+/**
+ * TODO: BUG:
+ * - Resolver update markes all other props as optional, need a global fix for this
+ * - need a config file schema that can mark props, or i need to switch it out to toml soon.
+ */
+
 const resolverConfigHeader = (alias: string) =>
   `RESOLVER_CONFIG_${alias.toUpperCase()}`;
 const resolverDefaultHeader = 'DEFAULT_RESOLVER';
 
 export async function configFile(args: any, ctx: any) {
-  logger.info('config file');
+  const { cwd } = ctx;
+  const { subCommand, subArgs } = parseSubCommand(args);
+
+  const def = [
+    {
+      name: 'path',
+      alias: 'p',
+      type: String,
+      description:
+        'Path to where env file should be created, relative to project root',
+    },
+    {
+      name: 'stack',
+      alias: 's',
+      type: String,
+      description:
+        'The name of the stack to add config to, default to default stack',
+    },
+    help.def,
+  ];
+
+  const opt = commandLineArgs(def, { argv: subArgs });
+
+  if (opt.help) {
+    return help.log(
+      def,
+      'Edit the resolver config',
+      help.getUsageText('config file', '<fileName>')
+    );
+  }
+
+  const targetStack = opt.stack || 'default';
+
+  const ymirPath = helper.ymirProjectFolderPath(cwd);
+  const [configFileError, configFile] = await stack.get.getConfig(
+    ymirPath,
+    targetStack
+  );
+
+  if (configFileError) {
+    return logError(configFileError);
+  }
+
+  const [parsed, comments] = trans.parseStackFile(configFile);
+
+  const envFileName = subCommand || parsed['FILE'].name || null;
+  const filePath = opt.path || parsed['FILE'].path || './';
+
+  if (!envFileName) {
+    return logger.error(
+      `Please specify a file name: ${help.getUsageText(
+        'config file',
+        '<fileName>'
+      )}`
+    );
+  }
+
+  logger.info(`${chalk.green('Using')} ${chalk.bold(filePath)} as path`);
+  logger.info(
+    `${chalk.green('Using')} ${chalk.bold(envFileName)} as file name`
+  );
+
+  const content = { ...parsed };
+  content['FILE'] = {
+    ...parsed['FILE'],
+    path: filePath,
+    name: envFileName,
+  };
+
+  const configData = trans.transpileObjectToStack(content, comments, [
+    'path',
+    'name',
+  ]);
+
+  return stack.update.updateConfigFile(ymirPath, targetStack, configData);
 }
 
 export function parseResolverConfigFromOpt(config: string[]): [string[], any] {
@@ -193,14 +273,10 @@ export async function config(args: any, ctx: any) {
 
   const { subCommand, subArgs } = parseSubCommand(args);
 
-  const def = [help.def];
-
-  const opt = commandLineArgs(def, { argv: subArgs });
-
   // TODO: needs a help logger that works with sub commands;
-  if (opt.help) {
+  if (subArgs.includes('--help') || subArgs.includes('-h')) {
     return help.log(
-      def,
+      [help.def],
       'Edit stack config',
       help.getUsageText('config file|resolver')
     );
@@ -220,9 +296,4 @@ export async function config(args: any, ctx: any) {
   }
 
   return configHandlers[subCommand](subArgs, ctx);
-  /**
-   * ymir config file .env -p relPath
-   * ymir config resolver ssm -d [boolean set to default]
-   * ymir config resolver ssm -c prop1=val1 -c prop2=val2
-   */
 }
